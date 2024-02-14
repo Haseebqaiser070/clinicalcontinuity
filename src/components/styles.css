@@ -1,0 +1,118 @@
+@import url("https://fonts.googleapis.com/css?family=Nunito");
+@import url("https://fonts.googleapis.com/css?family=Poppins");
+
+body {
+  font-family: Nunito;
+  padding: 0;
+  margin: 0;
+}
+
+h1 {
+  font-size: 30px;
+  font-weight: 700;
+  line-height: normal;
+  color: #0e2040;
+}
+
+h2 {
+  font-size: 18px;
+  font-weight: 600;
+  line-height: normal;
+  color: #212121;
+}
+
+label {
+  color: #666666;
+  font-size: 14px;
+  font-weight: 400;
+}
+
+.btn-web {
+  background-color: #537f92;
+  color: #fff;
+  border-radius: 10;
+}
+
+.btn-web:hover {
+  background-color: #b7b6c9;
+  color: #fff;
+}
+
+.login-card {
+  width: 700px;
+  background-color: "#fff";
+  padding: 30px;
+  border-radius: 10;
+  height: auto;
+}
+
+.background-image {
+  background-image: url("../images/loginBac.png");
+  background-size: cover;
+  background-position: center;
+  height: 100vh;
+}
+
+th {
+  font-family: Poppins;
+  color: #464e5f;
+  font-size: 14px;
+  font-weight: 600;
+  text-transform: uppercase;
+}
+
+.table-card {
+    padding: 30px;
+    box-shadow: rgba(100, 100, 111, 0.2) 0px 7px 29px 0px;
+}
+
+.icon-btn{
+    color: #537F92;
+    font-size: 22px;
+    padding: 0;
+}
+.icon-btn:hover{
+  color: #b7b6c9;
+  padding: 0;
+}
+
+.stat{
+  font-weight: bold;
+  font-size: 16px;
+  color: #212121;
+  
+}
+
+.orangecol{
+  padding:10px;
+  background-color: #FFA722;
+}
+.greencol{
+  padding:10px;
+  background-color: #00CD21;
+}
+.yellowcol{
+  padding:10px;
+  background-color: #FFF622;
+}
+.redcol{
+  padding:10px;
+  background-color: #FF0000;
+}
+
+.subheading{
+  font-weight: bold;
+  color:#537F92;
+  font-size: 14px;
+}
+.snackbar {
+  position: fixed;
+  bottom: 20px;
+  left: 50%;
+  transform: translateX(-50%);
+  background-color: rgba(0, 0, 0, 0.8);
+  color: #fff;
+  padding: 10px 20px;
+  border-radius: 5px;
+  z-index: 999;
+}
