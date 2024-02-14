@@ -82,6 +82,11 @@ const RoomAssigned = (props) => {
     const updatedCategories = [...categories];
     updatedCategories[categoryIndex].beds[bedIndex].acuity = value;
     setCategories(updatedCategories);
+    setShowSnackbar(true);
+    // Hide the snackbar after 1-2 seconds
+    setTimeout(() => {
+      setShowSnackbar(false);
+    }, 2000);
   };
 
   // Function to update notes information
@@ -89,6 +94,11 @@ const RoomAssigned = (props) => {
     const updatedCategories = [...categories];
     updatedCategories[categoryIndex].beds[bedIndex].notes = value;
     setCategories(updatedCategories);
+    setShowSnackbar(true);
+    // Hide the snackbar after 1-2 seconds
+    setTimeout(() => {
+      setShowSnackbar(false);
+    }, 2000);
   };
 
   // Function to update EDD information
@@ -96,6 +106,11 @@ const RoomAssigned = (props) => {
     const updatedCategories = [...categories];
     updatedCategories[categoryIndex].beds[bedIndex].edd = value;
     setCategories(updatedCategories);
+    setShowSnackbar(true);
+    // Hide the snackbar after 1-2 seconds
+    setTimeout(() => {
+      setShowSnackbar(false);
+    }, 2000);
   };
 
   // Function to handle pagination within a category
