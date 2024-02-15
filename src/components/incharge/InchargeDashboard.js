@@ -7,23 +7,23 @@ import RoomAssigned from "./RoomAssigned";
 
 const InchargeDashboard = () => {
   return (
-    <div className="p-4">
+    <div className="">
       <NavBar />
-      <h1 className="pb-2 mt-4 pt-4">MBU PNU1 DASHBOARD</h1>
+      <h1 className=" m-4 pt-4">MBU PNU1 DASHBOARD</h1>
 
-      <div className="p-4">
+      <div className="p-4 m-4">
         <p>
           <span className="stat">Date:</span> <span>2/08/2024 7:08</span>
         </p>
         <p>
-          <span className="stat">Charge RN:</span> <span>Nurse A | 0.89</span>
+          <span className="stat">Charge RN:</span> <span>Nurse A</span>
         </p>
         <p>
-          <span className="stat">Nursery RN:</span> <span>Nurse B | 0.89</span>
+          <span className="stat">Nursery RN:</span> <span>Nurse B</span>
         </p>
       </div>
-      <div className="row">
-        <div className="col-md-7 d-flex flex-column m-4">
+      <div className="row d-flex justify-content-center">
+        <div className="col-md-7 d-flex flex-column mx-2">
         <div className="mb-4 table-card">
             <RoomAssigned/>
 
@@ -33,7 +33,7 @@ const InchargeDashboard = () => {
 
           </div>
         </div>
-        <div className="col-md-4 d-flex flex-column m-4">
+        <div className="col-md-4 d-flex flex-column mx-2">
           <div className="mb-4 table-card">
             <ColorStats />
           </div>

@@ -16,8 +16,8 @@ const AdminDashboard = () => {
   return (
     <div className="p-4">
       <NavBar />
-      <h1 className="pb-4 mt-4 pt-4 mb-4">Hospital Data</h1>
-      <div className="row">
+      <h1 className="pb-4 mt-4 pt-4 mb-2">Hospital Data</h1>
+      {/* <div className="row">
         <div className="col-md-7 table-card d-flex flex-column m-4">
           <TableHeader
             title="Hospital Beds"
@@ -97,7 +97,7 @@ const AdminDashboard = () => {
             </table>
           </div>
         </div>
-      </div>
+      </div> */}
       <div className="row">
         <div className="table-card d-flex flex-column m-4">
           <TableHeader title="Nurses" onClick={() => setModalShowNurse(true)} />
