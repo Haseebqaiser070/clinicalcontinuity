@@ -129,3 +129,11 @@ th {
 .input-field {
   width: 70%; /* or adjust the width as needed */
 }
+
+.nurse-input-field {
+  width: 20%; /* or adjust the width as needed */
+}
+
+.shift-input-field {
+  width: 100%; /* or adjust the width as needed */
+}

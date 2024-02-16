@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useState } from "react";
 import NavBar from "../ReusableComponents/NavBar";
 import ColorStats from "./ColorStats";
 import HospitalBeds from "./HospitalBeds";
@@ -6,6 +6,19 @@ import Discharge from "./Discharge";
 import RoomAssigned from "./RoomAssigned";
 
 const InchargeDashboard = () => {
+  const nurseOptions = ["Nurse A", "Nurse B", "Nurse C", "Nurse D", "Nurse E"];
+  const [selectedRnNurse, setSelectedRnNurse] = useState("");
+  const [selectedNursery, setSelectedNursery] = useState("");
+
+  const handleNurseryChange = (e) => {
+    setSelectedNursery(e.target.value);
+  };
+
+
+  const handleRnNurseChange = (e) => {
+    setSelectedRnNurse(e.target.value);
+  };
+
   return (
     <div className="">
       <NavBar />
@@ -16,21 +29,44 @@ const InchargeDashboard = () => {
           <span className="stat">Date:</span> <span>2/08/2024 7:08</span>
         </p>
         <p>
-          <span className="stat">Charge RN:</span> <span>Nurse A</span>
+          <span className="stat">Charge RN:</span>{" "}
+          <span>
+            <select
+              className="bedbody nurse-input-field"
+              value={selectedRnNurse}
+              onChange={handleRnNurseChange}
+            >
+              <option value="">Select Nurse</option>
+              {nurseOptions.map((option, i) => (
+                <option key={i} value={option}>
+                  {option}
+                </option>
+              ))}
+            </select>
+          </span>
         </p>
         <p>
-          <span className="stat">Nursery RN:</span> <span>Nurse B</span>
+          <span className="stat">Nursery RN:</span> <span>            <select
+              className="bedbody nurse-input-field"
+              value={selectedNursery}
+              onChange={handleNurseryChange}
+            >
+              <option value="">Select Nurse</option>
+              {nurseOptions.map((option, i) => (
+                <option key={i} value={option}>
+                  {option}
+                </option>
+              ))}
+            </select></span>
         </p>
       </div>
       <div className="row d-flex justify-content-center">
         <div className="col-md-7 d-flex flex-column mx-2">
-        <div className="mb-4 table-card">
-            <RoomAssigned/>
-
+          <div className="mb-4 table-card">
+            <RoomAssigned />
           </div>
           <div className="mb-4 table-card">
-            <Discharge/>
-
+            <Discharge />
           </div>
         </div>
         <div className="col-md-4 d-flex flex-column mx-2">
@@ -38,7 +74,6 @@ const InchargeDashboard = () => {
             <ColorStats />
           </div>
           <div className="table-card">
-
             <HospitalBeds />
           </div>
         </div>
