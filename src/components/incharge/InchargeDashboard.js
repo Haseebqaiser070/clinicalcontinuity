@@ -19,15 +19,20 @@ const InchargeDashboard = () => {
     setSelectedRnNurse(e.target.value);
   };
 
+  const currentDate = new Date(); // Get current date
+const formattedDate = `${currentDate.getMonth() + 1}/${currentDate.getDate()}/${currentDate.getFullYear()}`; // Format date as MM/DD/YYYY
+const formattedTime = `${currentDate.getHours()}:${currentDate.getMinutes().toString().padStart(2, '0')}`;
+
   return (
     <div className="">
       <NavBar />
       <h1 className=" m-4 pt-4">MBU PNU1 DASHBOARD</h1>
 
       <div className="p-4 m-4">
-        <p>
-          <span className="stat">Date:</span> <span>2/08/2024 7:08</span>
-        </p>
+      <p>
+      <span className="stat">Date:</span>{" "}
+      <span>{formattedDate} {formattedTime}</span>
+    </p>
         <p>
           <span className="stat">Charge RN:</span>{" "}
           <span>

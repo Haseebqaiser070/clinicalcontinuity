@@ -120,6 +120,7 @@ th {
 .bedhead{
   font-size: 13px;
   font-weight: bold;
+
 }
 .bedbody{
   font-size: 13px;
@@ -127,7 +128,7 @@ th {
 }
 
 .input-field {
-  width: 70%; /* or adjust the width as needed */
+  width: 100%; /* or adjust the width as needed */
 }
 
 .nurse-input-field {
@@ -136,4 +137,14 @@ th {
 
 .shift-input-field {
   width: 100%; /* or adjust the width as needed */
+}
+
+.columns {
+  column-count: 5;
+  column-gap: 20px;
+}
+
+.modal-body-scroll {
+  max-height: 400px; /* Adjust as needed */
+  overflow-y: auto;
 }

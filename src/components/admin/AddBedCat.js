@@ -33,8 +33,6 @@ const AddBedCat = (props) => {
             </div>
       </Modal.Body>
 
-
-
     </Modal>
   );
 };

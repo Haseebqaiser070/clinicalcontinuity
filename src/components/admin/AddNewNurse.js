@@ -44,7 +44,7 @@ const AddNewNurse = (props) => {
             id="email"
           />
         </div>
-        <div className="mb-3 mt-4">
+        {/* <div className="mb-3 mt-4">
         <label className="form-label">Select shift</label>
         <select
               className="shift-input-field"
@@ -58,7 +58,7 @@ const AddNewNurse = (props) => {
                 </option>
               ))}
             </select>
-        </div>
+        </div> */}
 
         <div className="d-grid mt-4 mb-2">
               <button className="btn btn-block btn-web mt-4">Submit</button>

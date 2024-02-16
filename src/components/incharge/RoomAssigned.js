@@ -391,11 +391,11 @@ const RoomAssigned = (props) => {
         (beds, tableIndex) => (
           <div key={tableIndex} className="m-4">
             <div className={`table-responsive ${tableColors[tableIndex]} `}>
-              <table className={`table-hover table-sm table table-bordered ${tableColors[tableIndex]}`}>
+              <table className={`table-hover table-sm table table-bordered ${tableColors[tableIndex]}`} style={{ tableLayout: "fixed" }}>
 
                 <thead>
                   <tr>
-                    <th  className="bedhead ">Beds</th>
+                    <th  className="bedhead " >Beds</th>
                     {beds.map((bed, bedIndex) => (
                       <th className="bedhead" key={bedIndex}>
                         {bed.bedNumber}
