@@ -1,501 +1,437 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
+import { db } from "../../firebase";
+import { getDocs, collection, doc, updateDoc, getDoc } from "firebase/firestore";
 
-const RoomAssigned = (props) => {
-  const [bedsTable1, setBedsTable1] = useState([
-    {
-      bedNumber: "2401",
-      nurse: "Nurse A",
-      acuity: "0.89",
-      notes: "",
-      edd: "13 Feb 2024",
-    },
-    {
-      bedNumber: "2402",
-      nurse: "Nurse A",
-      acuity: "0.89",
-      notes: "",
-      edd: "13 Feb 2024",
-    },
-    {
-      bedNumber: "2403",
-      nurse: "Nurse A",
-      acuity: "0.89",
-      notes: "",
-      edd: "13 Feb 2024",
-    },
-    {
-      bedNumber: "2404",
-      nurse: "Nurse A",
-      acuity: "0.89",
-      notes: "",
-      edd: "13 Feb 2024",
-    },
-    {
-      bedNumber: "2405",
-      nurse: "Nurse A",
-      acuity: "0.89",
-      notes: "",
-      edd: "13 Feb 2024",
-    },
-    {
-      bedNumber: "2406",
-      nurse: "Nurse A",
-      acuity: "0.89",
-      notes: "",
-      edd: "13 Feb 2024",
-    },
-    {
-      bedNumber: "2407",
-      nurse: "Nurse A",
-      acuity: "0.89",
-      notes: "",
-      edd: "13 Feb 2024",
-    },
-    // Add more beds for Table 1 as needed
-  ]);
+const RoomAssigned = () => {
+  const [bedsData, setBedsData] = useState([]);
+  const [nurseOptions, setNurseOptions] = useState([]);
+  const [acuityOptions] = useState(["1:1", "1:2", "1:3", "1:4", "1:5"]);
+  const tableColors = ["table-primary", "table-success", "table-warning", "table-info"];
+  let tableIndex = 0;
+  
 
-  const [bedsTable2, setBedsTable2] = useState([
-    {
-      bedNumber: "2501",
-      nurse: "Nurse A",
-      acuity: "0.89",
-      notes: "",
-      edd: "13 Feb 2024",
-    },
-    {
-      bedNumber: "2502",
-      nurse: "Nurse A",
-      acuity: "0.89",
-      notes: "",
-      edd: "13 Feb 2024",
-    },
-    {
-      bedNumber: "2503",
-      nurse: "Nurse A",
-      acuity: "0.89",
-      notes: "",
-      edd: "13 Feb 2024",
-    },
-    {
-      bedNumber: "2504",
-      nurse: "Nurse A",
-      acuity: "0.89",
-      notes: "",
-      edd: "13 Feb 2024",
-    },
-    {
-      bedNumber: "2505",
-      nurse: "Nurse A",
-      acuity: "0.89",
-      notes: "",
-      edd: "13 Feb 2024",
-    },
-    {
-      bedNumber: "2506",
-      nurse: "Nurse A",
-      acuity: "0.89",
-      notes: "",
-      edd: "13 Feb 2024",
-    },
-    {
-      bedNumber: "2507",
-      nurse: "Nurse A",
-      acuity: "0.89",
-      notes: "",
-      edd: "13 Feb 2024",
-    },
-    {
-      bedNumber: "2508",
-      nurse: "Nurse A",
-      acuity: "0.89",
-      notes: "",
-      edd: "13 Feb 2024",
-    },
-    {
-      bedNumber: "2509",
-      nurse: "Nurse A",
-      acuity: "0.89",
-      notes: "",
-      edd: "13 Feb 2024",
-    },
-    {
-      bedNumber: "2510",
-      nurse: "Nurse A",
-      acuity: "0.89",
-      notes: "",
-      edd: "13 Feb 2024",
-    },
-  ]);
+  useEffect(() => {
+    const fetchBedsData = async () => {
+      try {
+        const bedsCollection = collection(db, "beds");
+        const bedsSnapshot = await getDocs(bedsCollection);
+        const bedsDataFromFirestore = [];
+        bedsSnapshot.forEach((doc) => {
+          bedsDataFromFirestore.push({ id: doc.id, ...doc.data() });
+        });
+        // Sort bedsData by bedNumber in ascending order
+        bedsDataFromFirestore.sort((a, b) => a.bedNumber.localeCompare(b.bedNumber));
+        setBedsData(bedsDataFromFirestore);
+      } catch (error) {
+        console.error("Error fetching beds data:", error);
+      }
+    };
 
-  const [bedsTable3, setBedsTable3] = useState([
-    {
-      bedNumber: "2511",
-      nurse: "Nurse A",
-      acuity: "0.89",
-      notes: "",
-      edd: "13 Feb 2024",
-    },
-    {
-      bedNumber: "2512",
-      nurse: "Nurse A",
-      acuity: "0.89",
-      notes: "",
-      edd: "13 Feb 2024",
-    },
-    {
-      bedNumber: "2513",
-      nurse: "Nurse A",
-      acuity: "0.89",
-      notes: "",
-      edd: "13 Feb 2024",
-    },
-    {
-      bedNumber: "2514",
-      nurse: "Nurse A",
-      acuity: "0.89",
-      notes: "",
-      edd: "13 Feb 2024",
-    },
-    {
-      bedNumber: "2515",
-      nurse: "Nurse A",
-      acuity: "0.89",
-      notes: "",
-      edd: "13 Feb 2024",
-    },
-    {
-      bedNumber: "2516",
-      nurse: "Nurse A",
-      acuity: "0.89",
-      notes: "",
-      edd: "13 Feb 2024",
-    },
-    {
-      bedNumber: "2517",
-      nurse: "Nurse A",
-      acuity: "0.89",
-      notes: "",
-      edd: "13 Feb 2024",
-    },
-    {
-      bedNumber: "2518",
-      nurse: "Nurse A",
-      acuity: "0.89",
-      notes: "",
-      edd: "13 Feb 2024",
-    },
-    {
-      bedNumber: "2519",
-      nurse: "Nurse A",
-      acuity: "0.89",
-      notes: "",
-      edd: "13 Feb 2024",
-    },
-    {
-      bedNumber: "2520",
-      nurse: "Nurse A",
-      acuity: "0.89",
-      notes: "",
-      edd: "13 Feb 2024",
-    },
-  ]);
+    const fetchNurseOptions = async () => {
+      try {
+        const shiftDoc = await getDoc(doc(db, "nurseshift", "zAbhUIEBGNlKBmt4VWQn"));
+        if (shiftDoc.exists()) {
+          const shiftData = shiftDoc.data();
+          setNurseOptions(shiftData.nurses);
+        }
+      } catch (error) {
+        console.error("Error fetching nurse options:", error);
+      }
+    };
 
-  const [bedsTable4, setBedsTable4] = useState([
-    {
-      bedNumber: "2521",
-      nurse: "Nurse A",
-      acuity: "0.89",
-      notes: "",
-      edd: "13 Feb 2024",
-    },
-    {
-      bedNumber: "2522",
-      nurse: "Nurse A",
-      acuity: "0.89",
-      notes: "",
-      edd: "13 Feb 2024",
-    },    {
-      bedNumber: "2523",
-      nurse: "Nurse A",
-      acuity: "0.89",
-      notes: "",
-      edd: "13 Feb 2024",
-    },    {
-      bedNumber: "2524",
-      nurse: "Nurse A",
-      acuity: "0.89",
-      notes: "",
-      edd: "13 Feb 2024",
-    },    {
-      bedNumber: "2525",
-      nurse: "Nurse A",
-      acuity: "0.89",
-      notes: "",
-      edd: "13 Feb 2024",
-    },    {
-      bedNumber: "2526",
-      nurse: "Nurse A",
-      acuity: "0.89",
-      notes: "",
-      edd: "13 Feb 2024",
-    },    {
-      bedNumber: "2527",
-      nurse: "Nurse A",
-      acuity: "0.89",
-      notes: "",
-      edd: "13 Feb 2024",
-    },    {
-      bedNumber: "2528",
-      nurse: "Nurse A",
-      acuity: "0.89",
-      notes: "",
-      edd: "13 Feb 2024",
-    },    {
-      bedNumber: "2529",
-      nurse: "Nurse A",
-      acuity: "0.89",
-      notes: "",
-      edd: "13 Feb 2024",
-    },    {
-      bedNumber: "2530",
-      nurse: "Nurse A",
-      acuity: "0.89",
-      notes: "",
-      edd: "13 Feb 2024",
-    },    {
-      bedNumber: "2531",
-      nurse: "Nurse A",
-      acuity: "0.89",
-      notes: "",
-      edd: "13 Feb 2024",
-    },   
+    fetchBedsData();
+    fetchNurseOptions();
+  }, []);
 
-  ]);
-
-  const acuityOptions = ["1:1", "1:2", "1:3", "1:4", "1:5"];
-  const nurseOptions = ["Nurse A", "Nurse B", "Nurse C", "Nurse D", "Nurse E"];
-
-  // Function to update nurse information
-  const updateNurseInfo = (tableIndex, bedIndex, value) => {
-    const setBeds = getSetBedsFunction(tableIndex);
-    const updatedBeds = [...setBeds];
-    updatedBeds[bedIndex].nurse = value;
-    switch (tableIndex) {
-      case 1:
-        setBedsTable1(updatedBeds);
-        break;
-      case 2:
-        setBedsTable2(updatedBeds);
-        break;
-      case 3:
-        setBedsTable3(updatedBeds);
-        break;
-      case 4:
-        setBedsTable4(updatedBeds);
-        break;
-      default:
-        break;
+  const handleNurseChange = async (bedId, nurseId) => {
+    try {
+      await updateDoc(doc(db, "beds", bedId), { nurseId });
+      // Update local state
+      const updatedBedsData = bedsData.map((bed) =>
+        bed.id === bedId ? { ...bed, nurseId } : bed
+      );
+      setBedsData(updatedBedsData);
+    } catch (error) {
+      console.error("Error updating nurse:", error);
     }
   };
 
-  // Function to update acuity information
-  const updateAcuityInfo = (tableIndex, bedIndex, value) => {
-    const setBeds = getSetBedsFunction(tableIndex);
-    const updatedBeds = [...setBeds];
-    updatedBeds[bedIndex].acuity = value;
-    switch (tableIndex) {
-      case 1:
-        setBedsTable1(updatedBeds);
-        break;
-      case 2:
-        setBedsTable2(updatedBeds);
-        break;
-      case 3:
-        setBedsTable3(updatedBeds);
-        break;
-      case 4:
-        setBedsTable4(updatedBeds);
-        break;
-      default:
-        break;
+  const handleAcuityChange = async (bedId, value) => {
+    try {
+      await updateDoc(doc(db, "beds", bedId), { acuity: value });
+      // Update local state
+      const updatedBedsData = bedsData.map((bed) =>
+        bed.id === bedId ? { ...bed, acuity: value } : bed
+      );
+      setBedsData(updatedBedsData);
+    } catch (error) {
+      console.error("Error updating acuity:", error);
     }
   };
 
-  // Function to update notes information
-  const updateNotesInfo = (tableIndex, bedIndex, value) => {
-    const setBeds = getSetBedsFunction(tableIndex);
-    const updatedBeds = [...setBeds];
-    updatedBeds[bedIndex].notes = value;
-    switch (tableIndex) {
-      case 1:
-        setBedsTable1(updatedBeds);
-        break;
-      case 2:
-        setBedsTable2(updatedBeds);
-        break;
-      case 3:
-        setBedsTable3(updatedBeds);
-        break;
-      case 4:
-        setBedsTable4(updatedBeds);
-        break;
-      default:
-        break;
+  const handleNotesChange = async (bedId, value) => {
+    try {
+      await updateDoc(doc(db, "beds", bedId), { notes: value });
+      // Update local state
+      const updatedBedsData = bedsData.map((bed) =>
+        bed.id === bedId ? { ...bed, notes: value } : bed
+      );
+      setBedsData(updatedBedsData);
+    } catch (error) {
+      console.error("Error updating notes:", error);
     }
   };
 
-  // Function to update EDD information
-  const updateEDDInfo = (tableIndex, bedIndex, value) => {
-    const setBeds = getSetBedsFunction(tableIndex);
-    const updatedBeds = [...setBeds];
-    updatedBeds[bedIndex].edd = value;
-    switch (tableIndex) {
-      case 1:
-        setBedsTable1(updatedBeds);
-        break;
-      case 2:
-        setBedsTable2(updatedBeds);
-        break;
-      case 3:
-        setBedsTable3(updatedBeds);
-        break;
-      case 4:
-        setBedsTable4(updatedBeds);
-        break;
-      default:
-        break;
+  const handleEDDChange = async (bedId, value) => {
+    try {
+      await updateDoc(doc(db, "beds", bedId), { edd: value });
+      // Update local state
+      const updatedBedsData = bedsData.map((bed) =>
+        bed.id === bedId ? { ...bed, edd: value } : bed
+      );
+      setBedsData(updatedBedsData);
+    } catch (error) {
+      console.error("Error updating EDD:", error);
     }
   };
 
-  // Function to return the appropriate setBeds function based on tableIndex
-  const getSetBedsFunction = (tableIndex) => {
-    switch (tableIndex) {
-      case 1:
-        return bedsTable1;
-      case 2:
-        return bedsTable2;
-      case 3:
-        return bedsTable3;
-      case 4:
-        return bedsTable4;
-      default:
-        return bedsTable1;
-    }
-  };
-  const tableColors = ["table-primary", "table-secondary", "table-success", "table-danger"];
+    // Function to filter beds based on bed number range
+    const filterBedsByRange = (start, end) => {
+      return bedsData.filter((bed) => {
+        const bedNumber = parseInt(bed.bedNumber);
+        return bedNumber >= start && bedNumber <= end;
+      });
+    };
 
   return (
     <div>
-      {/* Render each table separately */}
-      {[bedsTable1, bedsTable2, bedsTable3, bedsTable4].map(
-        (beds, tableIndex) => (
-          <div key={tableIndex} className="m-4">
-            <div className={`table-responsive ${tableColors[tableIndex]} `}>
-              <table className={`table-hover table-sm table table-bordered ${tableColors[tableIndex]}`} style={{ tableLayout: "fixed" }}>
 
-                <thead>
-                  <tr>
-                    <th  className="bedhead " >Beds</th>
-                    {beds.map((bed, bedIndex) => (
-                      <th className="bedhead" key={bedIndex}>
-                        {bed.bedNumber}
-                      </th>
+      {/* 2401 -2407 */}
+      <div className="table-responsive mb-4">
+        <table className='table table-hover table-sm table-bordered' style={{ tableLayout: "fixed" }}>
+          <thead>
+          <tr>
+              <th></th>
+              {filterBedsByRange(2401, 2407).map((bed) => (
+                <th key={bed.id} className="bedhead">
+                  {bed.bedNumber}
+                </th>
+              ))}
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td>Nurse</td>
+              {filterBedsByRange(2401, 2407).map((bed) => (
+                <td key={bed.id}>
+                  <select
+                    className="bedbody input-field"
+                    value={bed.nurseId}
+                    onChange={(e) => handleNurseChange(bed.id, e.target.value)}
+                  >
+                    <option value="">Select Nurse</option>
+                    {nurseOptions.map((nurse) => (
+                      <option key={nurse.id} value={nurse.id}>
+                        {nurse.name}
+                      </option>
                     ))}
-                  </tr>
-                </thead>
-                <tbody>
-                  <tr>
-                    <th className="bedhead">Nurse</th>
-                    {beds.map((bed, bedIndex) => (
-                      <td key={bedIndex}>
-                        <select
-                          className="bedbody input-field"
-                          value={bed.nurse}
-                          onChange={(e) =>
-                            updateNurseInfo(
-                              tableIndex + 1,
-                              bedIndex,
-                              e.target.value
-                            )
-                          }
-                        >
-                          {nurseOptions.map((option, i) => (
-                            <option key={i} value={option}>
-                              {option}
-                            </option>
-                          ))}
-                        </select>
-                      </td>
+                  </select>
+                </td>
+              ))}
+            </tr>
+            <tr>
+              <td>Acuity</td>
+              {filterBedsByRange(2401, 2407).map((bed) => (
+                <td key={bed.id}>
+                  <select
+                    className="bedbody input-field"
+                    value={bed.acuity}
+                    onChange={(e) => handleAcuityChange(bed.id, e.target.value)}
+                  >
+                    {acuityOptions.map((option) => (
+                      <option key={option} value={option}>
+                        {option}
+                      </option>
                     ))}
-                  </tr>
-                  <tr>
-                    <th className="bedhead">Acuity</th>
-                    {beds.map((bed, bedIndex) => (
-                      <td key={bedIndex}>
-                        <select
-                          className="bedbody input-field"
-                          value={bed.acuity}
-                          onChange={(e) =>
-                            updateAcuityInfo(
-                              tableIndex + 1,
-                              bedIndex,
-                              e.target.value
-                            )
-                          }
-                        >
-                          {acuityOptions.map((option, i) => (
-                            <option key={i} value={option}>
-                              {option}
-                            </option>
-                          ))}
-                        </select>
-                      </td>
+                  </select>
+                </td>
+              ))}
+            </tr>
+            <tr>
+              <td>Notes</td>
+              {filterBedsByRange(2401, 2407).map((bed) => (
+                <td key={bed.id}>
+                  <input
+                    className="bedbody input-field"
+                    type="text"
+                    value={bed.notes}
+                    onChange={(e) => handleNotesChange(bed.id, e.target.value)}
+                  />
+                </td>
+              ))}
+            </tr>
+            <tr>
+              <td>EDD</td>
+              {filterBedsByRange(2401, 2407).map((bed) => (
+                <td key={bed.id}>
+                  <input
+                    className="bedbody input-field"
+                    type="date"
+                    value={bed.edd}
+                    onChange={(e) => handleEDDChange(bed.id, e.target.value)}
+                  />
+                </td>
+              ))}
+            </tr>
+          </tbody>
+        </table>
+      </div>
+
+{/* 2501 -2510 */}
+
+      <div className="table-responsive mb-4">
+        <table className="table-hover table-sm table-bordered">
+          <thead>
+          <tr>
+              <th></th>
+              {filterBedsByRange(2501, 2510).map((bed) => (
+                <th key={bed.id} className="bedhead">
+                  {bed.bedNumber}
+                </th>
+              ))}
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td>Nurse</td>
+              {filterBedsByRange(2501, 2510).map((bed) => (
+                <td key={bed.id}>
+                  <select
+                    className="bedbody input-field"
+                    value={bed.nurseId}
+                    onChange={(e) => handleNurseChange(bed.id, e.target.value)}
+                  >
+                    <option value="">Select Nurse</option>
+                    {nurseOptions.map((nurse) => (
+                      <option key={nurse.id} value={nurse.id}>
+                        {nurse.name}
+                      </option>
                     ))}
-                  </tr>
-                  <tr>
-                    <th className="bedhead">Notes</th>
-                    {beds.map((bed, bedIndex) => (
-                      <td key={bedIndex} className="col-1">
-                        <input
-                          className="bedbody input-field"
-                          type="text"
-                          value={bed.notes}
-                          onChange={(e) =>
-                            updateNotesInfo(
-                              tableIndex + 1,
-                              bedIndex,
-                              e.target.value
-                            )
-                          }
-                        />
-                      </td>
+                  </select>
+                </td>
+              ))}
+            </tr>
+            <tr>
+              <td>Acuity</td>
+              {filterBedsByRange(2501, 2510).map((bed) => (
+                <td key={bed.id}>
+                  <select
+                    className="bedbody input-field"
+                    value={bed.acuity}
+                    onChange={(e) => handleAcuityChange(bed.id, e.target.value)}
+                  >
+                    {acuityOptions.map((option) => (
+                      <option key={option} value={option}>
+                        {option}
+                      </option>
                     ))}
-                  </tr>
-                  <tr>
-                    <th className="bedhead">EDD</th>
-                    {beds.map((bed, bedIndex) => (
-                      <td key={bedIndex} >
-                        <input
-                          className="bedbody input-field"
-                          type="date"
-                          value={bed.edd}
-                          onChange={(e) =>
-                            updateEDDInfo(
-                              tableIndex + 1,
-                              bedIndex,
-                              e.target.value
-                            )
-                          }
-                        />
-                      </td>
+                  </select>
+                </td>
+              ))}
+            </tr>
+            <tr>
+              <td>Notes</td>
+              {filterBedsByRange(2501, 2510).map((bed) => (
+                <td key={bed.id}>
+                  <input
+                    className="bedbody input-field"
+                    type="text"
+                    value={bed.notes}
+                    onChange={(e) => handleNotesChange(bed.id, e.target.value)}
+                  />
+                </td>
+              ))}
+            </tr>
+            <tr>
+              <td>EDD</td>
+              {filterBedsByRange(2501, 2510).map((bed) => (
+                <td key={bed.id}>
+                  <input
+                    className="bedbody input-field"
+                    type="date"
+                    value={bed.edd}
+                    onChange={(e) => handleEDDChange(bed.id, e.target.value)}
+                  />
+                </td>
+              ))}
+            </tr>
+          </tbody>
+        </table>
+      </div>
+
+{/* 2511 -2520 */}
+
+      <div className="table-responsive mb-4 table-primary">
+        <table className="table-hover table-sm table-bordered table-primary" style={{ tableLayout: "fixed" }}>
+          <thead>
+          <tr>
+              <th></th>
+              {filterBedsByRange(2511, 2520).map((bed) => (
+                <th key={bed.id} className="bedhead">
+                  {bed.bedNumber}
+                </th>
+              ))}
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td>Nurse</td>
+              {filterBedsByRange(2511, 2520).map((bed) => (
+                <td key={bed.id}>
+                  <select
+                    className="bedbody input-field"
+                    value={bed.nurseId}
+                    onChange={(e) => handleNurseChange(bed.id, e.target.value)}
+                  >
+                    <option value="">Select Nurse</option>
+                    {nurseOptions.map((nurse) => (
+                      <option key={nurse.id} value={nurse.id}>
+                        {nurse.name}
+                      </option>
                     ))}
-                  </tr>
-                </tbody>
-              </table>
-            </div>
-          </div>
-        )
-      )}
+                  </select>
+                </td>
+              ))}
+            </tr>
+            <tr>
+              <td>Acuity</td>
+              {filterBedsByRange(2511, 2520).map((bed) => (
+                <td key={bed.id}>
+                  <select
+                    className="bedbody input-field"
+                    value={bed.acuity}
+                    onChange={(e) => handleAcuityChange(bed.id, e.target.value)}
+                  >
+                    {acuityOptions.map((option) => (
+                      <option key={option} value={option}>
+                        {option}
+                      </option>
+                    ))}
+                  </select>
+                </td>
+              ))}
+            </tr>
+            <tr>
+              <td>Notes</td>
+              {filterBedsByRange(2511, 2520).map((bed) => (
+                <td key={bed.id}>
+                  <input
+                    className="bedbody input-field"
+                    type="text"
+                    value={bed.notes}
+                    onChange={(e) => handleNotesChange(bed.id, e.target.value)}
+                  />
+                </td>
+              ))}
+            </tr>
+            <tr>
+              <td>EDD</td>
+              {filterBedsByRange(2511, 2520).map((bed) => (
+                <td key={bed.id}>
+                  <input
+                    className="bedbody input-field"
+                    type="date"
+                    value={bed.edd}
+                    onChange={(e) => handleEDDChange(bed.id, e.target.value)}
+                  />
+                </td>
+              ))}
+            </tr>
+          </tbody>
+        </table>
+      </div>
+
+{/* 2521 -2531 */}
+
+      <div className="table-responsive">
+        <table className="table-hover table-sm table-bordered">
+          <thead>
+          <tr>
+              <th></th>
+              {filterBedsByRange(2521, 2531).map((bed) => (
+                <th key={bed.id} className="bedhead">
+                  {bed.bedNumber}
+                </th>
+              ))}
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td>Nurse</td>
+              {filterBedsByRange(2521, 2531).map((bed) => (
+                <td key={bed.id}>
+                  <select
+                    className="bedbody input-field"
+                    value={bed.nurseId}
+                    onChange={(e) => handleNurseChange(bed.id, e.target.value)}
+                  >
+                    <option value="">Select Nurse</option>
+                    {nurseOptions.map((nurse) => (
+                      <option key={nurse.id} value={nurse.id}>
+                        {nurse.name}
+                      </option>
+                    ))}
+                  </select>
+                </td>
+              ))}
+            </tr>
+            <tr>
+              <td>Acuity</td>
+              {filterBedsByRange(2521, 2531).map((bed) => (
+                <td key={bed.id}>
+                  <select
+                    className="bedbody input-field"
+                    value={bed.acuity}
+                    onChange={(e) => handleAcuityChange(bed.id, e.target.value)}
+                  >
+                    {acuityOptions.map((option) => (
+                      <option key={option} value={option}>
+                        {option}
+                      </option>
+                    ))}
+                  </select>
+                </td>
+              ))}
+            </tr>
+            <tr>
+              <td>Notes</td>
+              {filterBedsByRange(2521, 2531).map((bed) => (
+                <td key={bed.id}>
+                  <input
+                    className="bedbody input-field"
+                    type="text"
+                    value={bed.notes}
+                    onChange={(e) => handleNotesChange(bed.id, e.target.value)}
+                  />
+                </td>
+              ))}
+            </tr>
+            <tr>
+              <td>EDD</td>
+              {filterBedsByRange(2521, 2531).map((bed) => (
+                <td key={bed.id}>
+                  <input
+                    className="bedbody input-field"
+                    type="date"
+                    value={bed.edd}
+                    onChange={(e) => handleEDDChange(bed.id, e.target.value)}
+                  />
+                </td>
+              ))}
+            </tr>
+          </tbody>
+        </table>
+      </div>
     </div>
   );
 };

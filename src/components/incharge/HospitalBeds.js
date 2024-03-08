@@ -1,6 +1,8 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { Modal, Button, Form } from "react-bootstrap";
 import "../styles.css";
+import { db } from "../../firebase";
+import { collection, addDoc, getDocs, updateDoc, getDoc, doc } from "firebase/firestore";
 
 const getColorClass = (percent) => {
   if (percent <= 70) {
@@ -15,12 +17,10 @@ const getColorClass = (percent) => {
 };
 
 const HospitalBeds = () => {
-  const percent = 119; // Sample percent value, replace it with your actual value
-  const colorClass = getColorClass(percent);
-
   const [modalShow, setModalShow] = useState(false);
   const [selectedNurses, setSelectedNurses] = useState([]);
-  const nurseOptions = ["Nurse A", "Nurse B", "Nurse C", "Nurse D", "Nurse E", "Nurse F", "Nurse G", "Nurse H", "Nurse I", "Nurse J", "Nurse K", "Nurse L", "Nurse M", "Nurse N", "Nurse O", "Nurse P", "Nurse Q", "Nurse R", "Nurse S", "Nurse T", "Nurse U", "Nurse V", "Nurse W", "Nurse X", "Nurse Y", "Nurse Z"]; // Example, replace with your actual nurse list
+  const [nurseOptions, setNurseOptions] = useState([]);
+  const [shiftNurses, setShiftNurses] = useState([]);
 
   const handleCheckboxChange = (event) => {
     const { value, checked } = event.target;
@@ -33,11 +33,71 @@ const HospitalBeds = () => {
     }
   };
 
-  const handleSubmit = () => {
-    // Your submit logic here
-    console.log("Selected Nurses:", selectedNurses);
-    setModalShow(false);
+  useEffect(() => {
+    const fetchNurses = async () => {
+      try {
+        const querySnapshot = await getDocs(collection(db, "nurses"));
+        const nursesData = [];
+        querySnapshot.forEach((doc) => {
+          nursesData.push({ id: doc.id, ...doc.data() });
+        });
+        setNurseOptions(nursesData);
+      } catch (error) {
+        console.error("Error fetching nurses:", error);
+      }
+    };
+
+    const fetchShiftNurses = async () => {
+      try {
+        const shiftDoc = await getDoc(doc(db, "nurseshift", "zAbhUIEBGNlKBmt4VWQn"));
+        if (shiftDoc.exists()) {
+          const shiftData = shiftDoc.data();
+          setShiftNurses(shiftData.nurses);
+        }
+      } catch (error) {
+        console.error("Error fetching shift nurses:", error);
+      }
+    };
+
+    fetchNurses();
+    fetchShiftNurses();
+  }, []);
+
+  const handleSubmit = async (event) => {
+    event.preventDefault(); // Prevent the default form submission behavior
+  
+    try {
+      // Check if there's an existing document in the nurseshift collection
+      const shiftQuerySnapshot = await getDocs(collection(db, "nurseshift"));
+      if (!shiftQuerySnapshot.empty) {
+        // If there's an existing document, update it
+        const shiftDoc = shiftQuerySnapshot.docs[0]; // Assuming there's only one document in the collection
+        await updateDoc(shiftDoc.ref, {
+          nurses: selectedNurses.map((nurseId) => {
+            const nurse = nurseOptions.find((nurse) => nurse.id === nurseId);
+            return { id: nurse.id, name: nurse.name, co: 'No', rn: '1.0', actual: '', percent: '', points: '' };
+          }),
+        });
+        console.log("Selected nurses updated in Firestore");
+      } else {
+        // If no existing document found, add a new one
+        const docRef = await addDoc(collection(db, "nurseshift"), {
+          nurses: selectedNurses.map((nurseId) => {
+            const nurse = nurseOptions.find((nurse) => nurse.id === nurseId);
+            return { id: nurse.id, name: nurse.name, co: 'No', rn: '1.0', actual: '', percent: '', points: '' };
+          }),
+        });
+        console.log("Selected nurses added to Firestore with ID: ", docRef.id);
+      }
+  
+      setModalShow(false);
+    } catch (error) {
+      console.error("Error updating/adding selected nurses to Firestore: ", error);
+    }
   };
+  
+  
+  
 
   return (
     <div>
@@ -65,48 +125,56 @@ const HospitalBeds = () => {
             </tr>
           </thead>
           <tbody>
-            <tr>
-              <td>Nurse A</td>
-              <td>No</td>
-              <td>1.0</td>
-              <td>0.89</td>
-              <td>
-                <p className={` ${colorClass}`} style={{ padding: 2, textAlign: "center" }}>
-                  {percent}%
-                </p>
-              </td>
-              <td>0</td>
-            </tr>
+            {shiftNurses.map((nurse, index) => (
+              <tr key={index}>
+                <td>{nurse.name}</td>
+                <td>{nurse.co}</td>
+                <td>{nurse.rn}</td>
+                <td>{nurse.actual}</td>
+                <td>
+                  <p className={` ${getColorClass(nurse.percent)}`} style={{ padding: 2, textAlign: "center" }}>
+                    {nurse.percent}%
+                  </p>
+                </td>
+                <td>{nurse.points}</td>
+              </tr>
+            ))}
           </tbody>
         </table>
       </div>
 
-      <Modal show={modalShow} onHide={() => setModalShow(false)}       size="md"
-      aria-labelledby="contained-modal-title-vcenter"
-      centered>
+      <Modal
+        show={modalShow}
+        onHide={() => setModalShow(false)}
+        size="md"
+        aria-labelledby="contained-modal-title-vcenter"
+        centered
+      >
         <Modal.Header closeButton>
-          <Modal.Title id="contained-modal-title-vcenter"><h2>Select Nurses in Shift</h2></Modal.Title>
+          <Modal.Title id="contained-modal-title-vcenter">
+            <h2>Select Nurses in Shift</h2>
+          </Modal.Title>
         </Modal.Header>
         <Modal.Body className="modal-body-scroll">
           <Form>
-            <div className="columns">
+          <div className="columns">
+              {/* Use nurseOptions fetched from Firestore */}
               {nurseOptions.map((nurse, index) => (
                 <Form.Check
                   key={index}
                   type="checkbox"
-                  label={nurse}
-                  value={nurse}
-                  checked={selectedNurses.includes(nurse)}
+                  label={nurse.name} // Assuming 'name' is the field representing nurse name in your Firestore document
+                  value={nurse.id} // Use unique identifier for each nurse, like document ID
+                  checked={selectedNurses.includes(nurse.id)}
                   onChange={handleCheckboxChange}
                 />
               ))}
             </div>
             <div className="d-grid mt-4 mb-2">
-              <button className="btn btn-block btn-web mt-4">Submit</button>
+              <button className="btn btn-block btn-web mt-4" onClick={handleSubmit}>Submit</button>
             </div>
           </Form>
         </Modal.Body>
-
       </Modal>
     </div>
   );

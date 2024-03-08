@@ -1,16 +1,56 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import "../styles.css";
 import { FaEye, FaEyeSlash } from "react-icons/fa";
 import { Link } from "react-router-dom";
-
+import { useNavigate } from "react-router-dom";
+import { auth } from "../../firebase";
+import { signInWithEmailAndPassword } from "firebase/auth";
 
 const Login = () => {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [showPassword, setShowPassword] = useState(false);
+  const [error, setError] = useState("");
+  const navigate = useNavigate();
+  const [User, setUser] = useState({});
 
   const togglePasswordVisibility = () => {
     setShowPassword(!showPassword);
+  };
+
+  useEffect(() => {
+    const unsubscribe = auth.onAuthStateChanged((user) => {
+      setUser(user);
+    });
+
+    return unsubscribe;
+  }, []);
+
+  const handleLogin = async (e) => {
+    e.preventDefault(); // Prevent default form submission
+
+    if (!email || !password) {
+      setError("Please fill in all fields.");
+      return;
+    }
+
+    try {
+      await signInWithEmailAndPassword(auth, email, password);
+      // Login successful, navigate to dashboard or wherever needed
+      navigate("/admin-dashboard");
+    } catch (error) {
+      // Handle specific error cases
+      if (
+        error.code === "auth/user-not-found" ||
+        error.code === "auth/wrong-password"
+      ) {
+        setError("Invalid email or password.");
+      } else {
+        // Handle other errors
+        console.error("Error logging in:", error);
+        setError("An unexpected error occurred. Please try again later.");
+      }
+    }
   };
 
   return (
@@ -18,6 +58,11 @@ const Login = () => {
       <div className="login-card col-md-6 col-lg-4">
         <div className="card p-4">
           <h1 className="text-center mb-4">Login to Dashboard</h1>
+          {error && (
+            <div className="alert alert-danger" role="alert">
+              {error}
+            </div>
+          )}
           <div className="mb-3 mt-4">
             <label className="form-label">Email address</label>
             <input
@@ -49,7 +94,12 @@ const Login = () => {
 
           <Link to="/admin-dashboard">
             <div className="d-grid">
-              <button className="btn btn-block btn-web mt-4">Submit</button>
+              <button
+                className="btn btn-block btn-web mt-4"
+                onClick={handleLogin}
+              >
+                Submit
+              </button>
             </div>
           </Link>
         </div>
