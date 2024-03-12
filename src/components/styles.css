@@ -148,3 +148,7 @@ th {
   max-height: 400px; /* Adjust as needed */
   overflow-y: auto;
 }
+
+.table-container table {
+  background-color: #0e2040;
+}

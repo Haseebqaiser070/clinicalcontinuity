@@ -3,7 +3,9 @@ import TableHeader from "../ReusableComponents/TableHeader";
 import ActionButtons from "../ReusableComponents/ActionButtons";
 import NavBar from "../ReusableComponents/NavBar";
 import AddNewNurse from "./AddNewNurse";
-import { db } from "../../firebase";
+import { db, auth } from "../../firebase"; // Import auth from firebase
+import { createUserWithEmailAndPassword, deleteUser } from "firebase/auth"; // Import createUserWithEmailAndPassword and deleteUser from firebase/auth
+
 import {
   collection,
   onSnapshot,
@@ -41,13 +43,25 @@ const AdminDashboard = () => {
     }
   };
 
-  const handleChargeRnToggle = async (id, currentValue) => {
+  const handleChargeRnToggle = async (id, currentValue, nurseEmail) => {
     try {
       const nurseRef = doc(db, "nurses", id);
       await updateDoc(nurseRef, {
         chargeRn: !currentValue,
       });
-      console.log("Charge RN updated successfully!");
+  
+      if (!currentValue) {
+        // Create user account
+        await createUserWithEmailAndPassword(auth, nurseEmail, "defaultPassword");
+        console.log("User account created successfully!");
+      } else {
+        // Delete user account
+        const user = auth.currentUser;
+        if (user) {
+          await deleteUser(user);
+          console.log("User account deleted successfully!");
+        }
+      }
     } catch (error) {
       console.error("Error updating Charge RN: ", error);
     }
@@ -99,7 +113,7 @@ const AdminDashboard = () => {
                             id={`custom-switch-${index}`}
                             checked={nurse.chargeRn}
                             onChange={() =>
-                              handleChargeRnToggle(nurse.id, nurse.chargeRn)
+                              handleChargeRnToggle(nurse.id, nurse.chargeRn, nurse.email)
                             }
                           />
                         </Form>

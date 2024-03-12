@@ -12,6 +12,7 @@ import {
   updateDoc,
   getDoc,
   doc,
+  onSnapshot, // Import onSnapshot for real-time updates
 } from "firebase/firestore";
 
 const InchargeDashboard = () => {
@@ -19,24 +20,68 @@ const InchargeDashboard = () => {
   const [selectedNursery, setSelectedNursery] = useState("");
   const [shiftNurses, setShiftNurses] = useState([]);
 
-  const handleNurseryChange = (e) => {
-    setSelectedNursery(e.target.value);
+  const handleNurseryChange = async (e) => {
+    try {
+      const nurseryName = e.target.value;
+      setSelectedNursery(nurseryName);
+
+      // Update Firestore document
+      await updateNurseStatus(nurseryName, "nurseryRN");
+    } catch (error) {
+      console.error("Error updating nursery RN:", error);
+    }
   };
 
-  const handleRnNurseChange = (e) => {
-    setSelectedRnNurse(e.target.value);
+  const handleRnNurseChange = async (e) => {
+    try {
+      const rnName = e.target.value;
+      setSelectedRnNurse(rnName);
+
+      // Update Firestore document
+      await updateNurseStatus(rnName, "chargeRN");
+    } catch (error) {
+      console.error("Error updating charge RN:", error);
+    }
   };
 
   useEffect(() => {
     const fetchShiftNurses = async () => {
       try {
-        const shiftDoc = await getDoc(
-          doc(db, "nurseshift", "zAbhUIEBGNlKBmt4VWQn")
-        );
-        if (shiftDoc.exists()) {
-          const shiftData = shiftDoc.data();
-          setShiftNurses(shiftData.nurses);
-        }
+        const shiftNursesCollection = collection(db, "nurseshift");
+        const unsubscribe = onSnapshot(shiftNursesCollection, (snapshot) => {
+          const shiftNursesData = [];
+          snapshot.forEach((doc) => {
+            const data = doc.data();
+            shiftNursesData.push(...data.nurses);
+          });
+
+          // Sort shiftNursesData by date
+          shiftNursesData.sort((a, b) => {
+            const dateA = new Date(a.date);
+            const dateB = new Date(b.date);
+            return dateA - dateB;
+          });
+
+          setShiftNurses(shiftNursesData);
+
+          // Find the nurse with the selectedRnNurse value and update selectedRnNurse
+          const selectedRnNurseDoc = shiftNursesData.find(
+            (nurse) => nurse.chargeRN === true
+          );
+          if (selectedRnNurseDoc) {
+            setSelectedRnNurse(selectedRnNurseDoc.name);
+          }
+
+          // Find the nurse with the selectedNursery value and update selectedNursery
+          const selectedNurseryDoc = shiftNursesData.find(
+            (nurse) => nurse.nurseryRN === true
+          );
+          if (selectedNurseryDoc) {
+            setSelectedNursery(selectedNurseryDoc.name);
+          }
+        });
+
+        return unsubscribe;
       } catch (error) {
         console.error("Error fetching shift nurses:", error);
       }
@@ -45,13 +90,33 @@ const InchargeDashboard = () => {
   }, []);
 
   const currentDate = new Date(); // Get current date
-  const formattedDate = `${
-    currentDate.getMonth() + 1
-  }/${currentDate.getDate()}/${currentDate.getFullYear()}`; // Format date as MM/DD/YYYY
+  const formattedDate = `${currentDate.getDate()} ${currentDate.toLocaleString(
+    "default",
+    { month: "short" }
+  )} ${currentDate.getFullYear()}`; // Format date as DD MM YYYY
   const formattedTime = `${currentDate.getHours()}:${currentDate
     .getMinutes()
     .toString()
     .padStart(2, "0")}`;
+
+  const updateNurseStatus = async (nurseName, nurseType) => {
+    const shiftDocRef = doc(db, "nurseshift", "ie4Wp5jHRxIxq7r8TkRt");
+
+    const shiftDocSnapshot = await getDoc(shiftDocRef);
+    if (shiftDocSnapshot.exists()) {
+      const shiftData = shiftDocSnapshot.data();
+      const updatedNurses = shiftData.nurses.map((nurse) => {
+        if (nurse.name === nurseName) {
+          return { ...nurse, [nurseType]: true };
+        } else {
+          // Update the previous nurse's value to false
+          return { ...nurse, [nurseType]: false };
+        }
+      });
+
+      await updateDoc(shiftDocRef, { nurses: updatedNurses });
+    }
+  };
 
   return (
     <div className="">
@@ -85,18 +150,18 @@ const InchargeDashboard = () => {
         <p>
           <span className="stat">Nursery RN:</span>{" "}
           <span>
-          <select
-      className="bedbody nurse-input-field"
-      value={selectedNursery}
-      onChange={handleNurseryChange}
-    >
-      <option value="">Select Nurse</option>
-      {shiftNurses.map((nurse, index) => (
-        <option key={index} value={nurse.name}>
-          {nurse.name}
-        </option>
-      ))}
-    </select>
+            <select
+              className="bedbody nurse-input-field"
+              value={selectedNursery}
+              onChange={handleNurseryChange}
+            >
+              <option value="">Select Nurse</option>
+              {shiftNurses.map((nurse, index) => (
+                <option key={index} value={nurse.name}>
+                  {nurse.name}
+                </option>
+              ))}
+            </select>
           </span>
         </p>
       </div>

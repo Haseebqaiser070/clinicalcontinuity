@@ -28,16 +28,23 @@ const Login = () => {
 
   const handleLogin = async (e) => {
     e.preventDefault(); // Prevent default form submission
-
+  
     if (!email || !password) {
       setError("Please fill in all fields.");
       return;
     }
-
+  
     try {
-      await signInWithEmailAndPassword(auth, email, password);
-      // Login successful, navigate to dashboard or wherever needed
-      navigate("/admin-dashboard");
+      const userCredential = await signInWithEmailAndPassword(auth, email, password);
+      const user = userCredential.user;
+      // Check if the user's email is admin@admin.com
+      if (user.email === "admin@admin.com") {
+        // If admin, navigate to admin dashboard
+        navigate("/admin-dashboard");
+      } else {
+        // If not admin, navigate to nurse screen
+        navigate("/incharge-dashboard");
+      }
     } catch (error) {
       // Handle specific error cases
       if (
@@ -52,6 +59,7 @@ const Login = () => {
       }
     }
   };
+  
 
   return (
     <div className="background-image d-flex justify-content-center align-items-center">

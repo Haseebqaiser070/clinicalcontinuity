@@ -1,7 +1,44 @@
-import React from "react";
+import React, { useState, useEffect } from "react";
 import { Link } from "react-router-dom";
+import { auth, db } from "../../firebase";
+import { getDoc, doc } from "firebase/firestore";
 
 const NavBar = () => {
+  const [user, setUser] = useState(null);
+  const [loading, setLoading] = useState(true);
+  const [isHomeTabVisible, setIsHomeTabVisible] = useState(false);
+
+  useEffect(() => {
+    const unsubscribe = auth.onAuthStateChanged(async (user) => {
+      if (user) {
+        const userEmail = user.email;
+        console.log("User email:", userEmail);
+        
+        if (userEmail === "admin@admin.com") {
+          setIsHomeTabVisible(true); // Show Home tab for admin user
+        } else {
+          const userRef = doc(db, "nurses", user.uid);
+          const userDocSnap = await getDoc(userRef);
+          setIsHomeTabVisible(userDocSnap.exists()); // Show Home tab if user exists in nurse collection
+        }
+      } else {
+        setIsHomeTabVisible(false); // Ensure Home tab is not visible for non-authenticated users
+      }
+      setLoading(false);
+    });
+    return () => unsubscribe();
+  }, []);
+  
+  
+
+  const handleLogout = async () => {
+    try {
+      await auth.signOut();
+    } catch (error) {
+      console.error("Error logging out:", error);
+    }
+  };
+
   return (
     <nav className="navbar navbar-expand-lg navbar-light bg-light">
       <div className="container-fluid">
@@ -23,43 +60,24 @@ const NavBar = () => {
           id="navbarSupportedContent"
         >
           <ul className="navbar-nav mb-2 mb-lg-0">
-            <li className="nav-item">
-              <Link to="/admin-dashboard" className="nav-link active">
-                Home
-              </Link>
-            </li>
+          {!loading && isHomeTabVisible ? (
+  <li className="nav-item">
+    <Link to="/admin-dashboard" className="nav-link active">
+      Home
+    </Link>
+  </li>
+) : null}
+
 
             <li className="nav-item">
               <Link to="/incharge-dashboard" className="nav-link active">
                 Charge RN
               </Link>
             </li>
-
-            <li className="nav-item d-flex align-items-center">
-              <div className="d-flex align-items-center">
-                <Link to="/profile" className="nav-link active">
-                  <span className="p-2">Anima Agrawal </span>
-                </Link>
-                <div
-                  className="rounded-circle overflow-hidden"
-                  style={{
-                    width: 30,
-                    height: 30,
-                    backgroundColor: "#ccc",
-                    marginRight: "5px",
-                  }}
-                >
-                  <img
-                    src="https://cdn-icons-png.flaticon.com/512/6596/6596121.png"
-                    alt="Avatar"
-                    style={{
-                      width: "100%",
-                      height: "100%",
-                      objectFit: "cover",
-                    }}
-                  />
-                </div>
-              </div>
+            <li className="nav-item">
+              <Link to="/" className="nav-link active" onClick={handleLogout}>
+                Logout
+              </Link>
             </li>
           </ul>
         </div>
