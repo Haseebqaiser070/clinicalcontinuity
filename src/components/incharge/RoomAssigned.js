@@ -82,7 +82,7 @@ const RoomAssigned = () => {
     );
   
     return unsubscribe;
-  }, []);
+  }, [bedsData]);
   const handleNurseChange = async (bedId, nurseId, oldNurseId) => {
     try {
       // Update bed assignment
@@ -99,13 +99,11 @@ const RoomAssigned = () => {
           bedsData.forEach((bed) => {
             if (bed.nurseId === nurse.id) {
               totalBeds++;
-              console.log("Beds Updated 1")
               // Calculate total acuity for the nurse
               const acuityValue = parseFloat(
                 acuityOptions.find((option) => option.value === parseFloat(bed.acuity))?.value || 0
               );
               totalAcuity += acuityValue;
-              console.log("Acuity Updated 1")
             }
           });
           return { ...nurse, totalBeds, totalAcuity }; // Update total acuity for the nurse
@@ -113,22 +111,11 @@ const RoomAssigned = () => {
   
         // Update Firestore with the new nurse data
         await updateDoc(shiftDocRef, { nurses: updatedNurses });
-  
-        // Update local state with the new nurse data
-        setNurseOptions(updatedNurses);
-        const nurseBedCounts = {};
-        updatedNurses.forEach((nurse) => {
-          nurseBedCounts[nurse.id] = nurse.totalBeds || 0;
-        });
-        setNurseBedCounts(nurseBedCounts);
-        console.log("Beds Updated 2")
       }
     } catch (error) {
       console.error("Error updating nurse:", error);
     }
   };
-  
-  
   
   
 
@@ -217,7 +204,7 @@ const RoomAssigned = () => {
       {/* 2401 -2407 */}
       <div className="table-responsive mb-4 " >
         <table
-          className="table table-hover table-sm table-bordered table-container "
+          className="table table-hover table-sm table-bordered "
           style={{ tableLayout: "fixed"}}
         >
           <thead>
