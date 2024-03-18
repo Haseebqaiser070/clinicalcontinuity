@@ -19,6 +19,7 @@ const RoomAssigned = ({ setShiftNurses }) => {
     { label: "1:4", value: 0.23 },
     { label: "1:5", value: 0.18 },
   ]);
+  const [isLoading, setIsLoading] = useState(false);
 
   const [nurseBedCounts, setNurseBedCounts] = useState({});
 
@@ -51,6 +52,7 @@ const RoomAssigned = ({ setShiftNurses }) => {
   }, []);
 
   const handleNurseChange = async (bedId, newNurseId) => {
+  setIsLoading(true);
     try {
       // Step 1: Update the nurse assignment for the bed in Firestore
       await updateDoc(doc(db, "beds", bedId), { nurseId: newNurseId });
@@ -96,6 +98,7 @@ const RoomAssigned = ({ setShiftNurses }) => {
     } catch (error) {
       console.error("Error updating nurse assignment:", error);
     }
+    setIsLoading(false);
   };
   
   
@@ -181,6 +184,13 @@ const RoomAssigned = ({ setShiftNurses }) => {
 
   return (
     <div>
+            {isLoading ? (
+        <div className="text-center">
+          {/* Replace this div with your spinner component if using one */}
+          <div className="loader"></div>
+        </div>
+      ) : (
+        <div>
       {/* 2401 -2407 */}
       <div className="table-responsive mb-4 ">
         <table
@@ -520,9 +530,10 @@ const RoomAssigned = ({ setShiftNurses }) => {
             </tr>
           </tbody>
         </table>
-      </div>
+        </div>
+        </div>
+      )}
     </div>
   );
 };
-
 export default RoomAssigned;
