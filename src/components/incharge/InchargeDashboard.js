@@ -21,12 +21,15 @@ const InchargeDashboard = () => {
   const [shiftNurses, setShiftNurses] = useState([]);
 
   const handleNurseryChange = async (e) => {
+    console.log(e.target.value);
     try {
+      console.log();
       const nurseryName = e.target.value;
-      setSelectedNursery(nurseryName);
+      setSelectedNursery(e.target.value);
 
       // Update Firestore document
-      await updateNurseStatus(nurseryName, "nurseryRN");
+      console.log(e.target.value, "testing");
+      updateNurseStatus(e.target.value, "nurseryRN");
     } catch (error) {
       console.error("Error updating nursery RN:", error);
     }
@@ -103,7 +106,9 @@ const InchargeDashboard = () => {
     const shiftDocRef = doc(db, "nurseshift", "ie4Wp5jHRxIxq7r8TkRt");
 
     const shiftDocSnapshot = await getDoc(shiftDocRef);
+    console.log(nurseName, nurseType);
     if (shiftDocSnapshot.exists()) {
+      console.log("data");
       const shiftData = shiftDocSnapshot.data();
       const updatedNurses = shiftData.nurses.map((nurse) => {
         if (nurse.name === nurseName) {
@@ -113,6 +118,8 @@ const InchargeDashboard = () => {
           return { ...nurse, [nurseType]: false };
         }
       });
+      console.log(updatedNurses);
+      setShiftNurses(updatedNurses);
 
       await updateDoc(shiftDocRef, { nurses: updatedNurses });
     }
@@ -125,13 +132,13 @@ const InchargeDashboard = () => {
 
       <div className="p-4 m-4">
         <p>
-          <span className="stat">Date:</span>{" "}
+          <span className="stat">Date:</span>
           <span>
             {formattedDate} {formattedTime}
           </span>
         </p>
         <p>
-          <span className="stat">Charge RN:</span>{" "}
+          <span className="stat">Charge RN:</span>
           <span>
             <select
               className="bedbody nurse-input-field"
@@ -148,7 +155,7 @@ const InchargeDashboard = () => {
           </span>
         </p>
         <p>
-          <span className="stat">Nursery RN:</span>{" "}
+          <span className="stat">Nursery RN:</span>
           <span>
             <select
               className="bedbody nurse-input-field"
@@ -168,7 +175,10 @@ const InchargeDashboard = () => {
       <div className="row d-flex justify-content-center">
         <div className="col-md-7 d-flex flex-column mx-2">
           <div className="mb-4 table-card">
-            <RoomAssigned />
+            <RoomAssigned
+              setShiftNurses={setShiftNurses}
+              shiftNurses={shiftNurses}
+            />
           </div>
           <div className="mb-4 table-card">
             <Discharge />
@@ -179,7 +189,10 @@ const InchargeDashboard = () => {
             <ColorStats />
           </div>
           <div className="table-card">
-            <HospitalBeds />
+            <HospitalBeds
+              setShiftNurses={setShiftNurses}
+              shiftNurses={shiftNurses}
+            />
           </div>
         </div>
       </div>

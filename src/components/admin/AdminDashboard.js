@@ -4,7 +4,7 @@ import ActionButtons from "../ReusableComponents/ActionButtons";
 import NavBar from "../ReusableComponents/NavBar";
 import AddNewNurse from "./AddNewNurse";
 import { db, auth } from "../../firebase"; // Import auth from firebase
-import { createUserWithEmailAndPassword, deleteUser } from "firebase/auth"; // Import createUserWithEmailAndPassword and deleteUser from firebase/auth
+import { getAuth, createUserWithEmailAndPassword, signInWithEmailAndPassword, deleteUser, signOut } from "firebase/auth"; // Import createUserWithEmailAndPassword and deleteUser from firebase/auth
 
 import {
   collection,
@@ -44,26 +44,30 @@ const AdminDashboard = () => {
   };
 
   const handleChargeRnToggle = async (id, currentValue, nurseEmail) => {
+    const auth = getAuth();
     try {
+      // Update the chargeRn status in Firestore
       const nurseRef = doc(db, "nurses", id);
-      await updateDoc(nurseRef, {
-        chargeRn: !currentValue,
-      });
+      await updateDoc(nurseRef, { chargeRn: !currentValue });
   
       if (!currentValue) {
-        // Create user account
-        await createUserWithEmailAndPassword(auth, nurseEmail, "defaultPassword");
-        console.log("User account created successfully!");
+        // Attempt to create a new user account for the nurse
+        await createUserWithEmailAndPassword(auth, nurseEmail, "defaultPassword")
+          .then((userCredential) => {
+            // Signed in 
+            console.log(`User account created for email: ${nurseEmail}`, userCredential.user);
+            // It's important to sign out the newly created user right away to maintain the admin session
+            signOut(auth);
+          })
+          .catch((error) => {
+            console.error("Error creating user account: ", error.message);
+          });
       } else {
-        // Delete user account
-        const user = auth.currentUser;
-        if (user) {
-          await deleteUser(user);
-          console.log("User account deleted successfully!");
-        }
+        // For deleting a user account, you would need the user to be signed in or use Firebase Admin SDK on the server side
+        console.log(`User deletion for email ${nurseEmail} requires server-side implementation.`);
       }
     } catch (error) {
-      console.error("Error updating Charge RN: ", error);
+      console.error("Error updating Charge RN status: ", error);
     }
   };
 

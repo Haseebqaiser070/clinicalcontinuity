@@ -9,7 +9,7 @@ import {
   onSnapshot,
 } from "firebase/firestore";
 
-const RoomAssigned = () => {
+const RoomAssigned = ({ setShiftNurses }) => {
   const [bedsData, setBedsData] = useState([]);
   const [nurseOptions, setNurseOptions] = useState([]);
   const [acuityOptions] = useState([
@@ -22,98 +22,79 @@ const RoomAssigned = () => {
 
   const [nurseBedCounts, setNurseBedCounts] = useState({});
 
-
-
-  let tableIndex = 0;
-
   useEffect(() => {
-    const fetchBedsData = async () => {
-      try {
-        const bedsCollection = collection(db, "beds");
-        const unsubscribe = onSnapshot(bedsCollection, (snapshot) => {
-          const bedsDataFromFirestore = [];
-          snapshot.forEach((doc) => {
-            bedsDataFromFirestore.push({ id: doc.id, ...doc.data() });
-          });
-          // Sort bedsData by bedNumber in ascending order
-          bedsDataFromFirestore.sort((a, b) =>
-            a.bedNumber.localeCompare(b.bedNumber)
-          );
-          setBedsData(bedsDataFromFirestore);
-        });
+    // Fetch beds data
+    const bedsCollection = collection(db, "beds");
+    const unsubscribeBeds = onSnapshot(bedsCollection, (snapshot) => {
+      const bedsDataFromFirestore = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+      bedsDataFromFirestore.sort((a, b) => a.bedNumber.localeCompare(b.bedNumber));
+      setBedsData(bedsDataFromFirestore);
+    });
 
-        return unsubscribe;
-      } catch (error) {
-        console.error("Error fetching beds data:", error);
-      }
+    // Fetch nurses data
+    const shiftDocRef = doc(db, "nurseshift", "ie4Wp5jHRxIxq7r8TkRt");
+    const unsubscribeNurses = onSnapshot(shiftDocRef, (snapshot) => {
+      const data = snapshot.data();
+      setNurseOptions(data.nurses);
+      const nurseBedCountsUpdate = data.nurses.reduce((acc, nurse) => {
+        acc[nurse.id] = nurse.totalBeds || 0;
+        return acc;
+      }, {});
+      setNurseBedCounts(nurseBedCountsUpdate);
+    });
+
+    // Clean up subscriptions on component unmount
+    return () => {
+      unsubscribeBeds();
+      unsubscribeNurses();
     };
-
-    const fetchNurseOptions = async () => {
-      try {
-        const shiftDoc = await getDoc(
-          doc(db, "nurseshift", "ie4Wp5jHRxIxq7r8TkRt")
-        );
-        if (shiftDoc.exists()) {
-          const shiftData = shiftDoc.data();
-          setNurseOptions(shiftData.nurses);
-        }
-      } catch (error) {
-        console.error("Error fetching nurse options:", error);
-      }
-    };
-
-    fetchBedsData();
-    fetchNurseOptions();
   }, []);
 
-  useEffect(() => {
-    const unsubscribe = onSnapshot(
-      doc(db, "nurseshift", "ie4Wp5jHRxIxq7r8TkRt"),
-      (snapshot) => {
-        const data = snapshot.data();
-        setNurseOptions(data.nurses);
-        // Update nurse bed counts in local state
-        const nurseBedCounts = {};
-        data.nurses.forEach((nurse) => {
-          nurseBedCounts[nurse.id] = nurse.totalBeds || 0;
-        });
-        setNurseBedCounts(nurseBedCounts);
-      }
-    );
-  
-    return unsubscribe;
-  }, [bedsData]);
-  const handleNurseChange = async (bedId, nurseId, oldNurseId) => {
+  const handleNurseChange = async (bedId, newNurseId) => {
     try {
-      // Update bed assignment
-      await updateDoc(doc(db, "beds", bedId), { nurseId });
+      // Step 1: Update the nurse assignment for the bed in Firestore
+      await updateDoc(doc(db, "beds", bedId), { nurseId: newNurseId });
   
-      // Update nurse bed count and total acuity in Firestore
+      // Fetch the latest beds data after the update to ensure accuracy
+      const bedsSnapshot = await getDocs(collection(db, "beds"));
+      const latestBedsData = bedsSnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+  
+      // Prepare to recalculate beds and acuity for nurses
+      const nurseCalculations = {}; // Object to hold recalculated values
+  
+      // Initialize all nurses in nurseCalculations to ensure we correctly handle nurses with 0 beds or acuity
+      nurseOptions.forEach(nurse => {
+        nurseCalculations[nurse.id] = { totalBeds: 0, totalAcuity: 0 };
+      });
+  
+      // Recalculate total beds and acuity for each nurse based on the updated beds data
+      latestBedsData.forEach(bed => {
+        const nurseId = bed.nurseId;
+        if (nurseId && nurseCalculations[nurseId] !== undefined) {
+          nurseCalculations[nurseId].totalBeds += 1;
+          // Assume bed.acuity is a value that directly corresponds to one of the acuityOptions values
+          const acuityValue = parseFloat(bed.acuity || 0);
+          nurseCalculations[nurseId].totalAcuity += acuityValue;
+        }
+      });
+  
+      // Update the nurseshift document in Firestore with recalculated values
+      const updatedNurses = nurseOptions.map(nurse => ({
+        ...nurse,
+        totalBeds: nurseCalculations[nurse.id].totalBeds,
+        // Ensure totalAcuity is rounded or formatted as needed
+        totalAcuity: parseFloat(nurseCalculations[nurse.id].totalAcuity.toFixed(2)),
+      }));
+  
+      // Update Firestore
       const shiftDocRef = doc(db, "nurseshift", "ie4Wp5jHRxIxq7r8TkRt");
-      const shiftDocSnapshot = await getDoc(shiftDocRef);
-      if (shiftDocSnapshot.exists()) {
-        const shiftData = shiftDocSnapshot.data();
-        const updatedNurses = shiftData.nurses.map((nurse) => {
-          let totalBeds = 0;
-          let totalAcuity = 0; // Initialize total acuity
-          bedsData.forEach((bed) => {
-            if (bed.nurseId === nurse.id) {
-              totalBeds++;
-              // Calculate total acuity for the nurse
-              const acuityValue = parseFloat(
-                acuityOptions.find((option) => option.value === parseFloat(bed.acuity))?.value || 0
-              );
-              totalAcuity += acuityValue;
-            }
-          });
-          return { ...nurse, totalBeds, totalAcuity }; // Update total acuity for the nurse
-        });
+      await updateDoc(shiftDocRef, { nurses: updatedNurses });
   
-        // Update Firestore with the new nurse data
-        await updateDoc(shiftDocRef, { nurses: updatedNurses });
-      }
+      // Update local state
+      setBedsData(latestBedsData);
+      setNurseOptions(updatedNurses);
     } catch (error) {
-      console.error("Error updating nurse:", error);
+      console.error("Error updating nurse assignment:", error);
     }
   };
   
@@ -122,27 +103,29 @@ const RoomAssigned = () => {
   const handleAcuityChange = async (bedId, nurseId, value) => {
     try {
       await updateDoc(doc(db, "beds", bedId), { acuity: value });
-  
+
       // Update local state
       const updatedBedsData = bedsData.map((bed) =>
         bed.id === bedId ? { ...bed, acuity: value } : bed
       );
       setBedsData(updatedBedsData);
-  
+
       // Calculate the total acuity for the nurse
       let totalAcuity = 0;
       updatedBedsData.forEach((bed) => {
         if (bed.nurseId === nurseId) {
           const acuityValue = parseFloat(
-            acuityOptions.find((option) => option.value === parseFloat(bed.acuity))?.value || 0
+            acuityOptions.find(
+              (option) => option.value === parseFloat(bed.acuity)
+            )?.value || 0
           );
           totalAcuity += acuityValue;
         }
       });
-  
+
       // Round total acuity to 2 decimal places
       totalAcuity = totalAcuity.toFixed(2);
-  
+
       // Update the nurse shift document
       const shiftDocRef = doc(db, "nurseshift", "ie4Wp5jHRxIxq7r8TkRt");
       const shiftDocSnapshot = await getDoc(shiftDocRef);
@@ -161,8 +144,6 @@ const RoomAssigned = () => {
       console.error("Error updating acuity:", error);
     }
   };
-  
-  
 
   const handleNotesChange = async (bedId, value) => {
     try {
@@ -189,8 +170,7 @@ const RoomAssigned = () => {
       console.error("Error updating EDD:", error);
     }
   };
-    
-  
+
   // Function to filter beds based on bed number range
   const filterBedsByRange = (start, end) => {
     return bedsData.filter((bed) => {
@@ -202,10 +182,10 @@ const RoomAssigned = () => {
   return (
     <div>
       {/* 2401 -2407 */}
-      <div className="table-responsive mb-4 " >
+      <div className="table-responsive mb-4 ">
         <table
           className="table table-hover table-sm table-bordered "
-          style={{ tableLayout: "fixed"}}
+          style={{ tableLayout: "fixed" }}
         >
           <thead>
             <tr>

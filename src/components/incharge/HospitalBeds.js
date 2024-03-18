@@ -1,7 +1,13 @@
 import React, { useState, useEffect } from "react";
 import { Modal, Form } from "react-bootstrap";
 import { db } from "../../firebase";
-import { collection, addDoc, getDocs, updateDoc, onSnapshot } from "firebase/firestore";
+import {
+  collection,
+  addDoc,
+  getDocs,
+  updateDoc,
+  onSnapshot,
+} from "firebase/firestore";
 
 const getColorClass = (totalAcuity) => {
   const percent = totalAcuity * 100;
@@ -16,12 +22,10 @@ const getColorClass = (totalAcuity) => {
   }
 };
 
-
-const HospitalBeds = () => {
+const HospitalBeds = ({ setShiftNurses, shiftNurses }) => {
   const [modalShow, setModalShow] = useState(false);
   const [selectedNurses, setSelectedNurses] = useState([]);
   const [nurseOptions, setNurseOptions] = useState([]);
-  const [shiftNurses, setShiftNurses] = useState([]);
 
   const handleCheckboxChange = (event) => {
     const { value, checked } = event.target;
@@ -88,7 +92,15 @@ const HospitalBeds = () => {
         await updateDoc(shiftDoc.ref, {
           nurses: selectedNurses.map((nurseId) => {
             const nurse = nurseOptions.find((nurse) => nurse.id === nurseId);
-            return { id: nurse.id, name: nurse.name, rn: '1.0', totalAcuity: '', points: '', chargern:false, nurseryrn:false };
+            return {
+              id: nurse.id,
+              name: nurse.name,
+              rn: "1.0",
+              totalAcuity: "",
+              points: "",
+              chargern: false,
+              nurseryrn: false,
+            };
           }),
         });
         console.log("Selected nurses updated in Firestore");
@@ -96,7 +108,15 @@ const HospitalBeds = () => {
         const docRef = await addDoc(collection(db, "nurseshift"), {
           nurses: selectedNurses.map((nurseId) => {
             const nurse = nurseOptions.find((nurse) => nurse.id === nurseId);
-            return { id: nurse.id, name: nurse.name, rn: '1.0', totalAcuity: '', points: '', chargern:false, nurseryrn:false};
+            return {
+              id: nurse.id,
+              name: nurse.name,
+              rn: "1.0",
+              totalAcuity: "",
+              points: "",
+              chargern: false,
+              nurseryrn: false,
+            };
           }),
         });
         console.log("Selected nurses added to Firestore with ID: ", docRef.id);
@@ -104,7 +124,10 @@ const HospitalBeds = () => {
 
       setModalShow(false);
     } catch (error) {
-      console.error("Error updating/adding selected nurses to Firestore: ", error);
+      console.error(
+        "Error updating/adding selected nurses to Firestore: ",
+        error
+      );
     }
   };
 
@@ -139,7 +162,10 @@ const HospitalBeds = () => {
                 <td>{nurse.rn}</td>
                 <td>{nurse.totalAcuity}</td>
                 <td>
-                  <p className={` ${getColorClass(nurse.totalAcuity)}`} style={{ padding: 2, textAlign: "center" }}>
+                  <p
+                    className={` ${getColorClass(nurse.totalAcuity)}`}
+                    style={{ padding: 2, textAlign: "center" }}
+                  >
                     {nurse.totalAcuity * 100}%
                   </p>
                 </td>
@@ -177,7 +203,12 @@ const HospitalBeds = () => {
               ))}
             </div>
             <div className="d-grid mt-4 mb-2">
-              <button className="btn btn-block btn-web mt-4" onClick={handleSubmit}>Submit</button>
+              <button
+                className="btn btn-block btn-web mt-4"
+                onClick={handleSubmit}
+              >
+                Submit
+              </button>
             </div>
           </Form>
         </Modal.Body>
