@@ -184,13 +184,7 @@ const RoomAssigned = ({ setShiftNurses }) => {
 
   return (
     <div>
-            {isLoading ? (
-        <div className="text-center">
-          {/* Replace this div with your spinner component if using one */}
-          <div className="loader"></div>
-        </div>
-      ) : (
-        <div>
+
       {/* 2401 -2407 */}
       <div className="table-responsive mb-4 ">
         <table
@@ -201,7 +195,7 @@ const RoomAssigned = ({ setShiftNurses }) => {
             <tr>
               <th></th>
               {filterBedsByRange(2401, 2407).map((bed) => (
-                <th key={bed.id} className="bedhead">
+                <th key={`bed-${bed.id}`} className="bedhead">
                   {bed.bedNumber}
                 </th>
               ))}
@@ -211,7 +205,7 @@ const RoomAssigned = ({ setShiftNurses }) => {
             <tr>
               <td>Nurse</td>
               {filterBedsByRange(2401, 2407).map((bed) => (
-                <td key={bed.id}>
+                <td key={`bed-${bed.id}`}>
                   <select
                     className="bedbody input-field"
                     value={bed.nurseId}
@@ -230,7 +224,7 @@ const RoomAssigned = ({ setShiftNurses }) => {
             <tr>
               <td>Acuity</td>
               {filterBedsByRange(2401, 2407).map((bed) => (
-                <td key={bed.id}>
+                <td key={`bed-${bed.id}`}>
                   <select
                     className="bedbody input-field"
                     value={bed.acuity}
@@ -250,7 +244,7 @@ const RoomAssigned = ({ setShiftNurses }) => {
             <tr>
               <td>Notes</td>
               {filterBedsByRange(2401, 2407).map((bed) => (
-                <td key={bed.id}>
+                <td key={`bed-${bed.id}`}>
                   <input
                     className="bedbody input-field"
                     type="text"
@@ -263,7 +257,7 @@ const RoomAssigned = ({ setShiftNurses }) => {
             <tr>
               <td>EDD</td>
               {filterBedsByRange(2401, 2407).map((bed) => (
-                <td key={bed.id}>
+                <td key={`bed-${bed.id}`}>
                   <input
                     className="bedbody input-field"
                     type="date"
@@ -285,7 +279,7 @@ const RoomAssigned = ({ setShiftNurses }) => {
             <tr>
               <th></th>
               {filterBedsByRange(2501, 2510).map((bed) => (
-                <th key={bed.id} className="bedhead">
+                <th key={`bed-${bed.id}`} className="bedhead">
                   {bed.bedNumber}
                 </th>
               ))}
@@ -295,7 +289,7 @@ const RoomAssigned = ({ setShiftNurses }) => {
             <tr>
               <td>Nurse</td>
               {filterBedsByRange(2501, 2510).map((bed) => (
-                <td key={bed.id}>
+                <td key={`bed-${bed.id}`}>
                   <select
                     className="bedbody input-field"
                     value={bed.nurseId}
@@ -314,7 +308,7 @@ const RoomAssigned = ({ setShiftNurses }) => {
             <tr>
               <td>Acuity</td>
               {filterBedsByRange(2501, 2510).map((bed) => (
-                <td key={bed.id}>
+                <td key={`bed-${bed.id}`}>
                   <select
                     className="bedbody input-field"
                     value={bed.acuity}
@@ -334,7 +328,7 @@ const RoomAssigned = ({ setShiftNurses }) => {
             <tr>
               <td>Notes</td>
               {filterBedsByRange(2501, 2510).map((bed) => (
-                <td key={bed.id}>
+                <td key={`bed-${bed.id}`}>
                   <input
                     className="bedbody input-field"
                     type="text"
@@ -347,7 +341,7 @@ const RoomAssigned = ({ setShiftNurses }) => {
             <tr>
               <td>EDD</td>
               {filterBedsByRange(2501, 2510).map((bed) => (
-                <td key={bed.id}>
+                <td key={`bed-${bed.id}`}>
                   <input
                     className="bedbody input-field"
                     type="date"
@@ -372,7 +366,7 @@ const RoomAssigned = ({ setShiftNurses }) => {
             <tr>
               <th></th>
               {filterBedsByRange(2511, 2520).map((bed) => (
-                <th key={bed.id} className="bedhead">
+                <th key={`bed-${bed.id}`} className="bedhead">
                   {bed.bedNumber}
                 </th>
               ))}
@@ -382,7 +376,7 @@ const RoomAssigned = ({ setShiftNurses }) => {
             <tr>
               <td>Nurse</td>
               {filterBedsByRange(2511, 2520).map((bed) => (
-                <td key={bed.id}>
+                <td key={`bed-${bed.id}`}>
                   <select
                     className="bedbody input-field"
                     value={bed.nurseId}
@@ -401,7 +395,7 @@ const RoomAssigned = ({ setShiftNurses }) => {
             <tr>
               <td>Acuity</td>
               {filterBedsByRange(2511, 2520).map((bed) => (
-                <td key={bed.id}>
+                <td key={`bed-${bed.id}`}>
                   <select
                     className="bedbody input-field"
                     value={bed.acuity}
@@ -421,7 +415,7 @@ const RoomAssigned = ({ setShiftNurses }) => {
             <tr>
               <td>Notes</td>
               {filterBedsByRange(2511, 2520).map((bed) => (
-                <td key={bed.id}>
+                <td key={`bed-${bed.id}`}>
                   <input
                     className="bedbody input-field"
                     type="text"
@@ -434,7 +428,7 @@ const RoomAssigned = ({ setShiftNurses }) => {
             <tr>
               <td>EDD</td>
               {filterBedsByRange(2511, 2520).map((bed) => (
-                <td key={bed.id}>
+                <td key={`bed-${bed.id}`}>
                   <input
                     className="bedbody input-field"
                     type="date"
@@ -456,7 +450,7 @@ const RoomAssigned = ({ setShiftNurses }) => {
             <tr>
               <th></th>
               {filterBedsByRange(2521, 2531).map((bed) => (
-                <th key={bed.id} className="bedhead">
+                <th key={`bed-${bed.id}`} className="bedhead">
                   {bed.bedNumber}
                 </th>
               ))}
@@ -466,7 +460,7 @@ const RoomAssigned = ({ setShiftNurses }) => {
             <tr>
               <td>Nurse</td>
               {filterBedsByRange(2521, 2531).map((bed) => (
-                <td key={bed.id}>
+                <td key={`bed-${bed.id}`}>
                   <select
                     className="bedbody input-field"
                     value={bed.nurseId}
@@ -485,7 +479,7 @@ const RoomAssigned = ({ setShiftNurses }) => {
             <tr>
               <td>Acuity</td>
               {filterBedsByRange(2521, 2531).map((bed) => (
-                <td key={bed.id}>
+                <td key={`bed-${bed.id}`}>
                   <select
                     className="bedbody input-field"
                     value={bed.acuity}
@@ -505,7 +499,7 @@ const RoomAssigned = ({ setShiftNurses }) => {
             <tr>
               <td>Notes</td>
               {filterBedsByRange(2521, 2531).map((bed) => (
-                <td key={bed.id}>
+                <td key={`bed-${bed.id}`}>
                   <input
                     className="bedbody input-field"
                     type="text"
@@ -518,7 +512,7 @@ const RoomAssigned = ({ setShiftNurses }) => {
             <tr>
               <td>EDD</td>
               {filterBedsByRange(2521, 2531).map((bed) => (
-                <td key={bed.id}>
+                <td key={`bed-${bed.id}`}>
                   <input
                     className="bedbody input-field"
                     type="date"
@@ -531,9 +525,9 @@ const RoomAssigned = ({ setShiftNurses }) => {
           </tbody>
         </table>
         </div>
-        </div>
-      )}
+
     </div>
   );
 };
 export default RoomAssigned;
+
