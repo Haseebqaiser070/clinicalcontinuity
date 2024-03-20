@@ -131,15 +131,15 @@ const InchargeDashboard = () => {
       <h1 className=" m-4 pt-4">MBU PNU1 DASHBOARD</h1>
 
       <div className="p-4 m-4">
-        <p>
+        <p >
           <span className="stat">Date:</span>
-          <span>
+          <span className="mx-3">
             {formattedDate} {formattedTime}
           </span>
         </p>
         <p>
           <span className="stat">Charge RN:</span>
-          <span>
+          <span className=" mx-4">
             <select
               className="bedbody nurse-input-field"
               value={selectedRnNurse}
@@ -156,7 +156,7 @@ const InchargeDashboard = () => {
         </p>
         <p>
           <span className="stat">Nursery RN:</span>
-          <span>
+          <span className=" mx-3">
             <select
               className="bedbody nurse-input-field"
               value={selectedNursery}

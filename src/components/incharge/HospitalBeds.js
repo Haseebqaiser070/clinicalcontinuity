@@ -166,7 +166,7 @@ const HospitalBeds = ({ setShiftNurses, shiftNurses }) => {
                     className={` ${getColorClass(nurse.totalAcuity)}`}
                     style={{ padding: 2, textAlign: "center" }}
                   >
-                    {nurse.totalAcuity * 100}%
+                    {(nurse.totalAcuity * 100).toFixed(0)} %
                   </p>
                 </td>
                 <td>{nurse.totalBeds}</td>

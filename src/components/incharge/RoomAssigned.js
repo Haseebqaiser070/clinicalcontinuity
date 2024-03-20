@@ -19,7 +19,7 @@ const RoomAssigned = ({ setShiftNurses }) => {
     { label: "1:4", value: 0.23 },
     { label: "1:5", value: 0.18 },
   ]);
-  const [isLoading, setIsLoading] = useState(false);
+  const [isLoading, setIsLoading] = useState(false); 
 
   const [nurseBedCounts, setNurseBedCounts] = useState({});
 
@@ -27,8 +27,13 @@ const RoomAssigned = ({ setShiftNurses }) => {
     // Fetch beds data
     const bedsCollection = collection(db, "beds");
     const unsubscribeBeds = onSnapshot(bedsCollection, (snapshot) => {
-      const bedsDataFromFirestore = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
-      bedsDataFromFirestore.sort((a, b) => a.bedNumber.localeCompare(b.bedNumber));
+      const bedsDataFromFirestore = snapshot.docs.map((doc) => ({
+        id: doc.id,
+        ...doc.data(),
+      }));
+      bedsDataFromFirestore.sort((a, b) =>
+        a.bedNumber.localeCompare(b.bedNumber)
+      );
       setBedsData(bedsDataFromFirestore);
     });
 
@@ -52,25 +57,28 @@ const RoomAssigned = ({ setShiftNurses }) => {
   }, []);
 
   const handleNurseChange = async (bedId, newNurseId) => {
-  setIsLoading(true);
+    setIsLoading(true);
     try {
       // Step 1: Update the nurse assignment for the bed in Firestore
       await updateDoc(doc(db, "beds", bedId), { nurseId: newNurseId });
-  
+
       // Fetch the latest beds data after the update to ensure accuracy
       const bedsSnapshot = await getDocs(collection(db, "beds"));
-      const latestBedsData = bedsSnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
-  
+      const latestBedsData = bedsSnapshot.docs.map((doc) => ({
+        id: doc.id,
+        ...doc.data(),
+      }));
+
       // Prepare to recalculate beds and acuity for nurses
       const nurseCalculations = {}; // Object to hold recalculated values
-  
+
       // Initialize all nurses in nurseCalculations to ensure we correctly handle nurses with 0 beds or acuity
-      nurseOptions.forEach(nurse => {
+      nurseOptions.forEach((nurse) => {
         nurseCalculations[nurse.id] = { totalBeds: 0, totalAcuity: 0 };
       });
-  
+
       // Recalculate total beds and acuity for each nurse based on the updated beds data
-      latestBedsData.forEach(bed => {
+      latestBedsData.forEach((bed) => {
         const nurseId = bed.nurseId;
         if (nurseId && nurseCalculations[nurseId] !== undefined) {
           nurseCalculations[nurseId].totalBeds += 1;
@@ -79,19 +87,21 @@ const RoomAssigned = ({ setShiftNurses }) => {
           nurseCalculations[nurseId].totalAcuity += acuityValue;
         }
       });
-  
+
       // Update the nurseshift document in Firestore with recalculated values
-      const updatedNurses = nurseOptions.map(nurse => ({
+      const updatedNurses = nurseOptions.map((nurse) => ({
         ...nurse,
         totalBeds: nurseCalculations[nurse.id].totalBeds,
         // Ensure totalAcuity is rounded or formatted as needed
-        totalAcuity: parseFloat(nurseCalculations[nurse.id].totalAcuity.toFixed(2)),
+        totalAcuity: parseFloat(
+          nurseCalculations[nurse.id].totalAcuity.toFixed(2)
+        ),
       }));
-  
+
       // Update Firestore
       const shiftDocRef = doc(db, "nurseshift", "ie4Wp5jHRxIxq7r8TkRt");
       await updateDoc(shiftDocRef, { nurses: updatedNurses });
-  
+
       // Update local state
       setBedsData(latestBedsData);
       setNurseOptions(updatedNurses);
@@ -100,8 +110,6 @@ const RoomAssigned = ({ setShiftNurses }) => {
     }
     setIsLoading(false);
   };
-  
-  
 
   const handleAcuityChange = async (bedId, nurseId, value) => {
     try {
@@ -176,26 +184,27 @@ const RoomAssigned = ({ setShiftNurses }) => {
 
   // Function to filter beds based on bed number range
   const filterBedsByRange = (start, end) => {
-    return bedsData.filter((bed) => {
-      const bedNumber = parseInt(bed.bedNumber);
-      return bedNumber >= start && bedNumber <= end;
-    });
+    return bedsData
+      .filter((bed) => {
+        const bedNumber = parseInt(bed.bedNumber);
+        return bedNumber >= start && bedNumber <= end;
+      })
+      .sort((a, b) => parseInt(a.bedNumber) - parseInt(b.bedNumber));
   };
 
   return (
     <div>
-
       {/* 2401 -2407 */}
       <div className="table-responsive mb-4 ">
         <table
-          className="table table-hover table-sm table-bordered "
+          className="table table-hover table-sm table-bordered table-primary"
           style={{ tableLayout: "fixed" }}
         >
           <thead>
             <tr>
               <th></th>
               {filterBedsByRange(2401, 2407).map((bed) => (
-                <th key={`bed-${bed.id}`} className="bedhead">
+                <th key={`bed-${bed.id}`} className=" text-center bedhead">
                   {bed.bedNumber}
                 </th>
               ))}
@@ -203,7 +212,7 @@ const RoomAssigned = ({ setShiftNurses }) => {
           </thead>
           <tbody>
             <tr>
-              <td>Nurse</td>
+              <th>Nurse</th>
               {filterBedsByRange(2401, 2407).map((bed) => (
                 <td key={`bed-${bed.id}`}>
                   <select
@@ -222,7 +231,7 @@ const RoomAssigned = ({ setShiftNurses }) => {
               ))}
             </tr>
             <tr>
-              <td>Acuity</td>
+              <th>Acuity</th>
               {filterBedsByRange(2401, 2407).map((bed) => (
                 <td key={`bed-${bed.id}`}>
                   <select
@@ -242,7 +251,7 @@ const RoomAssigned = ({ setShiftNurses }) => {
               ))}
             </tr>
             <tr>
-              <td>Notes</td>
+              <th>Notes</th>
               {filterBedsByRange(2401, 2407).map((bed) => (
                 <td key={`bed-${bed.id}`}>
                   <input
@@ -255,7 +264,7 @@ const RoomAssigned = ({ setShiftNurses }) => {
               ))}
             </tr>
             <tr>
-              <td>EDD</td>
+              <th>EDD</th>
               {filterBedsByRange(2401, 2407).map((bed) => (
                 <td key={`bed-${bed.id}`}>
                   <input
@@ -274,12 +283,12 @@ const RoomAssigned = ({ setShiftNurses }) => {
       {/* 2501 -2510 */}
 
       <div className="table-responsive mb-4">
-        <table className="table-hover table-sm table-bordered">
+        <table className="table table-hover table-sm table-bordered table-danger" style={{ tableLayout: "fixed" }}>
           <thead>
             <tr>
               <th></th>
               {filterBedsByRange(2501, 2510).map((bed) => (
-                <th key={`bed-${bed.id}`} className="bedhead">
+                <th key={`bed-${bed.id}`} className="bedhead text-center">
                   {bed.bedNumber}
                 </th>
               ))}
@@ -287,7 +296,7 @@ const RoomAssigned = ({ setShiftNurses }) => {
           </thead>
           <tbody>
             <tr>
-              <td>Nurse</td>
+              <th>Nurse</th>
               {filterBedsByRange(2501, 2510).map((bed) => (
                 <td key={`bed-${bed.id}`}>
                   <select
@@ -306,7 +315,7 @@ const RoomAssigned = ({ setShiftNurses }) => {
               ))}
             </tr>
             <tr>
-              <td>Acuity</td>
+              <th>Acuity</th>
               {filterBedsByRange(2501, 2510).map((bed) => (
                 <td key={`bed-${bed.id}`}>
                   <select
@@ -326,7 +335,7 @@ const RoomAssigned = ({ setShiftNurses }) => {
               ))}
             </tr>
             <tr>
-              <td>Notes</td>
+              <th>Notes</th>
               {filterBedsByRange(2501, 2510).map((bed) => (
                 <td key={`bed-${bed.id}`}>
                   <input
@@ -339,7 +348,7 @@ const RoomAssigned = ({ setShiftNurses }) => {
               ))}
             </tr>
             <tr>
-              <td>EDD</td>
+              <th>EDD</th>
               {filterBedsByRange(2501, 2510).map((bed) => (
                 <td key={`bed-${bed.id}`}>
                   <input
@@ -359,14 +368,14 @@ const RoomAssigned = ({ setShiftNurses }) => {
 
       <div className="table-responsive mb-4 table-primary">
         <table
-          className="table-hover table-sm table-bordered table-primary"
+          className="table table-hover table-sm table-bordered table-success"
           style={{ tableLayout: "fixed" }}
         >
           <thead>
             <tr>
               <th></th>
               {filterBedsByRange(2511, 2520).map((bed) => (
-                <th key={`bed-${bed.id}`} className="bedhead">
+                <th key={`bed-${bed.id}`} className="bedhead text-center">
                   {bed.bedNumber}
                 </th>
               ))}
@@ -374,7 +383,7 @@ const RoomAssigned = ({ setShiftNurses }) => {
           </thead>
           <tbody>
             <tr>
-              <td>Nurse</td>
+              <th>Nurse</th>
               {filterBedsByRange(2511, 2520).map((bed) => (
                 <td key={`bed-${bed.id}`}>
                   <select
@@ -393,7 +402,7 @@ const RoomAssigned = ({ setShiftNurses }) => {
               ))}
             </tr>
             <tr>
-              <td>Acuity</td>
+              <th>Acuity</th>
               {filterBedsByRange(2511, 2520).map((bed) => (
                 <td key={`bed-${bed.id}`}>
                   <select
@@ -413,7 +422,7 @@ const RoomAssigned = ({ setShiftNurses }) => {
               ))}
             </tr>
             <tr>
-              <td>Notes</td>
+              <th>Notes</th>
               {filterBedsByRange(2511, 2520).map((bed) => (
                 <td key={`bed-${bed.id}`}>
                   <input
@@ -426,7 +435,7 @@ const RoomAssigned = ({ setShiftNurses }) => {
               ))}
             </tr>
             <tr>
-              <td>EDD</td>
+              <th>EDD</th>
               {filterBedsByRange(2511, 2520).map((bed) => (
                 <td key={`bed-${bed.id}`}>
                   <input
@@ -445,12 +454,12 @@ const RoomAssigned = ({ setShiftNurses }) => {
       {/* 2521 -2531 */}
 
       <div className="table-responsive">
-        <table className="table-hover table-sm table-bordered">
+        <table className="table table-hover table-sm table-bordered table-warning " style={{ tableLayout: "fixed" }}>
           <thead>
             <tr>
               <th></th>
               {filterBedsByRange(2521, 2531).map((bed) => (
-                <th key={`bed-${bed.id}`} className="bedhead">
+                <th key={`bed-${bed.id}`} className="bedhead text-center">
                   {bed.bedNumber}
                 </th>
               ))}
@@ -458,7 +467,7 @@ const RoomAssigned = ({ setShiftNurses }) => {
           </thead>
           <tbody>
             <tr>
-              <td>Nurse</td>
+              <th>Nurse</th>
               {filterBedsByRange(2521, 2531).map((bed) => (
                 <td key={`bed-${bed.id}`}>
                   <select
@@ -477,7 +486,7 @@ const RoomAssigned = ({ setShiftNurses }) => {
               ))}
             </tr>
             <tr>
-              <td>Acuity</td>
+              <th>Acuity</th>
               {filterBedsByRange(2521, 2531).map((bed) => (
                 <td key={`bed-${bed.id}`}>
                   <select
@@ -497,7 +506,7 @@ const RoomAssigned = ({ setShiftNurses }) => {
               ))}
             </tr>
             <tr>
-              <td>Notes</td>
+              <th>Notes</th>
               {filterBedsByRange(2521, 2531).map((bed) => (
                 <td key={`bed-${bed.id}`}>
                   <input
@@ -510,7 +519,7 @@ const RoomAssigned = ({ setShiftNurses }) => {
               ))}
             </tr>
             <tr>
-              <td>EDD</td>
+              <th>EDD</th>
               {filterBedsByRange(2521, 2531).map((bed) => (
                 <td key={`bed-${bed.id}`}>
                   <input
@@ -524,10 +533,8 @@ const RoomAssigned = ({ setShiftNurses }) => {
             </tr>
           </tbody>
         </table>
-        </div>
-
+      </div>
     </div>
   );
 };
 export default RoomAssigned;
-

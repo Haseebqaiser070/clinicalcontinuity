@@ -10,10 +10,12 @@ const NavBar = () => {
 
   useEffect(() => {
     const unsubscribe = auth.onAuthStateChanged(async (user) => {
+      console.log(user);
       if (user) {
+        console.log("data");
         const userEmail = user.email;
         console.log("User email:", userEmail);
-        
+
         if (userEmail === "admin@admin.com") {
           setIsHomeTabVisible(true); // Show Home tab for admin user
         } else {
@@ -22,14 +24,14 @@ const NavBar = () => {
           setIsHomeTabVisible(userDocSnap.exists()); // Show Home tab if user exists in nurse collection
         }
       } else {
+        console.log("lost");
+
         setIsHomeTabVisible(false); // Ensure Home tab is not visible for non-authenticated users
       }
       setLoading(false);
     });
     return () => unsubscribe();
   }, []);
-  
-  
 
   const handleLogout = async () => {
     try {
@@ -60,14 +62,13 @@ const NavBar = () => {
           id="navbarSupportedContent"
         >
           <ul className="navbar-nav mb-2 mb-lg-0">
-          {!loading && isHomeTabVisible ? (
-  <li className="nav-item">
-    <Link to="/admin-dashboard" className="nav-link active">
-      Home
-    </Link>
-  </li>
-) : null}
-
+            {!loading && isHomeTabVisible ? (
+              <li className="nav-item">
+                <Link to="/admin-dashboard" className="nav-link active">
+                  Home
+                </Link>
+              </li>
+            ) : null}
 
             <li className="nav-item">
               <Link to="/incharge-dashboard" className="nav-link active">
