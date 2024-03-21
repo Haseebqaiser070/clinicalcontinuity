@@ -2,6 +2,7 @@ import React, { useState, useEffect } from "react";
 import { Modal, Form } from "react-bootstrap";
 import { db } from "../../firebase";
 import {
+  doc,
   collection,
   addDoc,
   getDocs,
@@ -26,17 +27,6 @@ const HospitalBeds = ({ setShiftNurses, shiftNurses }) => {
   const [modalShow, setModalShow] = useState(false);
   const [selectedNurses, setSelectedNurses] = useState([]);
   const [nurseOptions, setNurseOptions] = useState([]);
-
-  const handleCheckboxChange = (event) => {
-    const { value, checked } = event.target;
-    if (checked) {
-      setSelectedNurses((prevSelected) => [...prevSelected, value]);
-    } else {
-      setSelectedNurses((prevSelected) =>
-        prevSelected.filter((nurse) => nurse !== value)
-      );
-    }
-  };
 
   useEffect(() => {
     const fetchNurses = async () => {
@@ -75,61 +65,68 @@ const HospitalBeds = ({ setShiftNurses, shiftNurses }) => {
   }, []);
 
   useEffect(() => {
-    // Populate selectedNurses when the modal opens
     if (modalShow) {
       const selectedNurseIds = shiftNurses.map((nurse) => nurse.id);
       setSelectedNurses(selectedNurseIds);
     }
   }, [modalShow, shiftNurses]);
 
-  const handleSubmit = async (event) => {
-    event.preventDefault();
-
-    try {
-      const shiftQuerySnapshot = await getDocs(collection(db, "nurseshift"));
-      if (!shiftQuerySnapshot.empty) {
-        const shiftDoc = shiftQuerySnapshot.docs[0];
-        await updateDoc(shiftDoc.ref, {
-          nurses: selectedNurses.map((nurseId) => {
-            const nurse = nurseOptions.find((nurse) => nurse.id === nurseId);
-            return {
-              id: nurse.id,
-              name: nurse.name,
-              rn: "1.0",
-              totalAcuity: "",
-              points: "",
-              chargern: false,
-              nurseryrn: false,
-            };
-          }),
-        });
-        console.log("Selected nurses updated in Firestore");
-      } else {
-        const docRef = await addDoc(collection(db, "nurseshift"), {
-          nurses: selectedNurses.map((nurseId) => {
-            const nurse = nurseOptions.find((nurse) => nurse.id === nurseId);
-            return {
-              id: nurse.id,
-              name: nurse.name,
-              rn: "1.0",
-              totalAcuity: "",
-              points: "",
-              chargern: false,
-              nurseryrn: false,
-            };
-          }),
-        });
-        console.log("Selected nurses added to Firestore with ID: ", docRef.id);
-      }
-
-      setModalShow(false);
-    } catch (error) {
-      console.error(
-        "Error updating/adding selected nurses to Firestore: ",
-        error
+  const handleCheckboxChange = (event) => {
+    const { value, checked } = event.target;
+    if (checked) {
+      setSelectedNurses((prevSelected) => [...prevSelected, value]);
+    } else {
+      setSelectedNurses((prevSelected) =>
+        prevSelected.filter((nurse) => nurse !== value)
       );
     }
   };
+
+  const handleSubmit = async (event) => {
+    event.preventDefault();
+  
+    try {
+      // Find existing shift document or create a new one
+      const shiftQuerySnapshot = await getDocs(collection(db, "nurseshift"));
+      const shiftDocRef = shiftQuerySnapshot.empty
+        ? await addDoc(collection(db, "nurseshift"), {})
+        : shiftQuerySnapshot.docs[0].ref;
+  
+      // Update or add nurses in the shift
+      await updateDoc(shiftDocRef, {
+        nurses: selectedNurses.map((nurseId) => {
+          const nurseOption = nurseOptions.find((nurse) => nurse.id === nurseId);
+          const existingNurse = shiftNurses.find((nurse) => nurse.id === nurseId) || {};
+          return {
+            id: nurseOption.id,
+            name: nurseOption.name,
+            rn: existingNurse.rn || "1.0",
+            totalAcuity: existingNurse.totalAcuity || "0.00",
+            totalBeds: existingNurse.totalBeds || "0",
+            chargern: existingNurse.chargern || false,
+            nurseryrn: existingNurse.nurseryrn || false,
+          };
+        }),
+      });
+  
+      // Optionally, unassign removed nurses from their beds
+      const bedsSnapshot = await getDocs(collection(db, "beds"));
+      bedsSnapshot.docs.forEach(async (docSnapshot) => {
+        const bedData = docSnapshot.data();
+        // Check if the bed's assigned nurse has been removed from the selected nurses
+        if (bedData.nurseId && !selectedNurses.includes(bedData.nurseId)) {
+          // Update bed to unassign the nurse
+          await updateDoc(doc(db, "beds", docSnapshot.id), { nurseId: "" });
+        }
+      });
+  
+      console.log("Selected nurses updated in Firestore");
+      setModalShow(false);
+    } catch (error) {
+      console.error("Error updating/adding selected nurses to Firestore: ", error);
+    }
+  };
+  
 
   return (
     <div>
