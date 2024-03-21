@@ -98,7 +98,7 @@ const Login = () => {
               {showPassword ? <FaEyeSlash size={20} /> : <FaEye size={20} />}
             </span>
           </div>
-          <label className="form-label text-end">Forgot Password?</label>
+          {/* <label className="form-label text-end">Forgot Password?</label> */}
 
           <Link to="/admin-dashboard">
             <div className="d-grid">

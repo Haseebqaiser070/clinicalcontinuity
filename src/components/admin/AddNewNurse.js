@@ -1,68 +1,86 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import Modal from "react-bootstrap/Modal";
 import { db } from "../../firebase";
 import {
   collection,
   addDoc,
+  doc,
+  updateDoc,
   query,
   where,
   getDocs,
 } from "firebase/firestore";
 
-const AddNewNurse = (props) => {
+const AddNewNurse = ({ show, onHide, editingNurse, onAddOrUpdateNurse }) => {
   const [name, setName] = useState("");
   const [email, setEmail] = useState("");
   const [message, setMessage] = useState("");
-  const [loading, setLoading] = useState(false); // Initially not loading
+  const [loading, setLoading] = useState(false);
 
-  const handleAddNurse = async () => {
-    try {
-      setLoading(true); // Start loading
-
-      // Check if nurse with the same email already exists
-      const nurseQuery = query(collection(db, "nurses"), where("email", "==", email));
-      const nurseQuerySnapshot = await getDocs(nurseQuery);
-      if (!nurseQuerySnapshot.empty) {
-        setMessage("Nurse with this email already exists.");
-        setLoading(false); // End loading
-        return;
-      }
-
-      // Add nurse if not already exists
-      await addDoc(collection(db, "nurses"), {
-        name: name,
-        email: email,
-        chargeRn: false,
-      });
-      console.log("Nurse added successfully!");
-      setMessage("Nurse added successfully!");
+  useEffect(() => {
+    if (editingNurse) {
+      setName(editingNurse.name);
+      setEmail(editingNurse.email);
+    } else {
       setName("");
       setEmail("");
-    } catch (error) {
-      console.error("Error adding nurse: ", error);
-      setMessage("Failed to add nurse. Please try again.");
-    } finally {
-      setLoading(false); // End loading in finally block to handle both success and error cases
     }
-  };
+    setMessage("");
+  }, [editingNurse]);
+
+  const handleSubmit = async () => {
+    setLoading(true);
+    setMessage("");
+
+    try {
+      if (!name || !email) {
+        throw new Error("Please fill in all fields.");
+      }
+
+      // Check for duplicate emails, excluding the current editing nurse's email
+      const nurseQuery = query(collection(db, "nurses"), where("email", "==", email));
+      const querySnapshot = await getDocs(nurseQuery);
+      const isDuplicateEmail = querySnapshot.docs.some(doc => editingNurse ? doc.id !== editingNurse.id : true);
+
+      if (isDuplicateEmail) {
+        throw new Error("Nurse with this email already exists.");
+      }
+
+      if (editingNurse) {
+        // Update existing nurse, including email
+        await updateDoc(doc(db, "nurses", editingNurse.id), { name, email });
+        setMessage("Nurse updated successfully!");
+      } else {
+        // Add new nurse
+        await addDoc(collection(db, "nurses"), { name, email, chargeRn: false });
+        setMessage("Nurse added successfully!");
+      }
+    } catch (error) {
+      console.error("Error adding/updating nurse: ", error);
+      setMessage(error.message || "Failed to add/update nurse. Please try again.");
+    } finally {
+      setLoading(false);
+      if (message.includes("successfully")) {
+        // Reset form and close modal after successful add/update
+        setName("");
+        setEmail("");
+        onAddOrUpdateNurse();
+        onHide(); // Assuming onHide is the function to hide the modal
+      }
+    }
+};
+
 
   return (
-    <Modal
-      {...props}
-      size="md"
-      aria-labelledby="contained-modal-title-vcenter"
-      centered
-    >
+    <Modal show={show} onHide={onHide} size="md" centered>
       <Modal.Header closeButton>
-        <Modal.Title id="contained-modal-title-vcenter">
-          <h2>Add New Nurse</h2>
-        </Modal.Title>
+        <Modal.Title>{editingNurse ? "Edit Nurse" : "Add New Nurse"}</Modal.Title>
       </Modal.Header>
       <Modal.Body>
         {message && (
           <p
             className={
-              message.includes("success")
+              message.includes("successfully")
                 ? "alert alert-success"
                 : "alert alert-danger"
             }
@@ -71,34 +89,33 @@ const AddNewNurse = (props) => {
             {message}
           </p>
         )}
-        <div className="mb-3 mt-4">
+        <div className="mb-3">
           <label className="form-label">Nurse Name</label>
           <input
             value={name}
             onChange={(e) => setName(e.target.value)}
             type="text"
             className="form-control"
-            id="name"
+            disabled={loading}
           />
         </div>
-        <div className="mb-3 mt-4">
+        <div className="mb-3">
           <label className="form-label">Nurse Email</label>
           <input
             value={email}
             onChange={(e) => setEmail(e.target.value)}
             type="email"
             className="form-control"
-            id="email"
+            disabled={loading }
           />
         </div>
-
-        <div className="d-grid mt-4 mb-2">
+        <div className="d-grid mb-2">
           <button
-            className="btn btn-block btn-web mt-4"
-            onClick={handleAddNurse}
-            disabled={loading} // Disable button when loading
+            className="btn btn-primary"
+            onClick={handleSubmit}
+            disabled={loading}
           >
-            {loading ? "Adding..." : "Submit"} {/* Show "Adding..." when loading */}
+            {loading ? "Processing..." : editingNurse ? "Update Nurse" : "Add Nurse"}
           </button>
         </div>
       </Modal.Body>
