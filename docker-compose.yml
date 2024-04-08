@@ -13,9 +13,9 @@ services:
     depends_on:
         - app
     volumes:
-      # - ./nginx/conf:/etc/nginx/conf.d
-     - ./nginx/local_conf:/etc/nginx/conf.d
-      # - /etc/letsencrypt:/etc/letsencrypt
+      - ./nginx/conf:/etc/nginx/conf.d
+    #  - ./nginx/local_conf:/etc/nginx/conf.d
+      - /etc/letsencrypt:/etc/letsencrypt
 
   app:
     container_name: Clinical-Communuty-Frontend
