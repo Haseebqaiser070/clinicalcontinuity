@@ -13,8 +13,8 @@ services:
     depends_on:
         - app
     volumes:
-      - ./nginx/conf:/etc/nginx/conf.d
-      # - ./nginx/local_conf:/etc/nginx/conf.d
+      # - ./nginx/conf:/etc/nginx/conf.d
+      - ./nginx/local_conf:/etc/nginx/conf.d
       - /etc/letsencrypt:/etc/letsencrypt
 
   app:
@@ -24,9 +24,9 @@ services:
       dockerfile: Dockerfile
     ports:
       - "3000:3000"
-    command: sh -c "npm install && npm start"
+    command: sh -c "npm start"
     stdin_open: true
     tty: true
-    volumes:
-      - .:/app
+    # volumes:
+    #   - .:/app
     # network_mode: "host"
