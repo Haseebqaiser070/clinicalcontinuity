@@ -14,7 +14,7 @@ services:
         - app
     volumes:
       - ./nginx/conf:/etc/nginx/conf.d
-    #  - ./nginx/local_conf:/etc/nginx/conf.d
+      # - ./nginx/local_conf:/etc/nginx/conf.d
       - /etc/letsencrypt:/etc/letsencrypt
 
   app:
@@ -22,8 +22,8 @@ services:
     build:
       context: .
       dockerfile: Dockerfile
-    # ports:
-    #   - "3000:3000"
+    ports:
+      - "3000:3000"
     command: sh -c "npm install && npm start"
     stdin_open: true
     tty: true
